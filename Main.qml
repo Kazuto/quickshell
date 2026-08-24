@@ -150,6 +150,12 @@ Rectangle {
         visible: AppState.screenRecorderOverlayVisible
     }
 
+    // Power overlay
+    Overlays.PowerOverlay {
+        id: powerOverlay
+        visible: AppState.powerOverlayVisible
+    }
+
     // IPC Socket Server
     SocketServer {
         id: ipcSocket
@@ -161,7 +167,11 @@ Rectangle {
                 onRead: msg => {
                     console.log("Received IPC command:", msg)
 
-                    if (msg === "spotify-toggle") {
+                    if (msg === "menu-toggle") {
+                        AppState.toggleMenuOverlay()
+                    } else if (msg === "power-toggle") {
+                        AppState.togglePowerOverlay()
+                    } else if (msg === "spotify-toggle") {
                         AppState.toggleSpotifyOverlay()
                     } else if (msg === "spotify-show") {
                         if (!AppState.spotifyOverlayVisible) {

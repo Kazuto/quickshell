@@ -19,6 +19,7 @@ Singleton {
     property string login: ""
     property string refresh: ""
     property string lock: ""
+    property string suspend: "󰤄"
     property string cpu: "󰻠"
     property string memory: "󰍛"
     property string network: "󰛳"

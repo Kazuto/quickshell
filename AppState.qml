@@ -17,6 +17,7 @@ Singleton {
     property bool calendarOverlayVisible: false
     property bool menuOverlayVisible: false
     property bool screenRecorderOverlayVisible: false
+    property bool powerOverlayVisible: false
     property bool isRecording: false
 
     function closeAllOverlays() {
@@ -32,6 +33,7 @@ Singleton {
         calendarOverlayVisible = false
         menuOverlayVisible = false
         screenRecorderOverlayVisible = false
+        powerOverlayVisible = false
     }
 
     function toggleSpotifyOverlay() {
@@ -123,5 +125,12 @@ Singleton {
             closeAllOverlays()
         }
         screenRecorderOverlayVisible = !screenRecorderOverlayVisible
+    }
+
+    function togglePowerOverlay() {
+        if (!powerOverlayVisible) {
+            closeAllOverlays()
+        }
+        powerOverlayVisible = !powerOverlayVisible
     }
 }
