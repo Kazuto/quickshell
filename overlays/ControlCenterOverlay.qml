@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Wayland
 import "root:/"
 import "root:/singletons"
+import "root:/components"
 
 PanelWindow {
     id: controlCenterOverlay
@@ -84,14 +85,11 @@ PanelWindow {
                         color: BluetoothData.powered ? Theme.sky : Theme.surface2
                         anchors.verticalCenter: parent.verticalCenter
 
-                        Text {
+                        SvgIcon {
                             anchors.centerIn: parent
-                            text: Icon.bluetooth
+                            name: "bluetooth"
+                            size: 22
                             color: BluetoothData.powered ? Theme.base : Theme.overlay0
-                            font.pixelSize: 20
-                            font.family: Config.moduleFontFamily
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignHCenter
                         }
                     }
 
@@ -176,14 +174,11 @@ PanelWindow {
                         color: WifiData.enabled ? Theme.blue : Theme.surface2
                         anchors.verticalCenter: parent.verticalCenter
 
-                        Text {
+                        SvgIcon {
                             anchors.centerIn: parent
-                            text: WifiData.enabled ? Icon.wifi : Icon.wifiOff
+                            name: WifiData.enabled ? "wifi" : "wifi-off"
+                            size: 22
                             color: WifiData.enabled ? Theme.base : Theme.overlay0
-                            font.pixelSize: 20
-                            font.family: Config.moduleFontFamily
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignHCenter
                         }
                     }
 
@@ -281,14 +276,11 @@ PanelWindow {
                             color: AudioData.outputMuted ? Theme.surface2 : Theme.mauve
                             anchors.verticalCenter: parent.verticalCenter
 
-                            Text {
+                            SvgIcon {
                                 anchors.centerIn: parent
-                                verticalAlignment: Text.AlignVCenter
-                                horizontalAlignment: Text.AlignHCenter
-                                text: AudioData.outputMuted ? Icon.volumeMuted : Icon.volume
+                                name: AudioData.outputMuted ? "volume-muted" : "volume"
+                                size: 18
                                 color: AudioData.outputMuted ? Theme.overlay0 : Theme.base
-                                font.pixelSize: 16
-                                font.family: Config.moduleFontFamily
                             }
 
                             MouseArea {
@@ -414,14 +406,11 @@ PanelWindow {
                             color: AudioData.inputMuted ? Theme.surface2 : Theme.mauve
                             anchors.verticalCenter: parent.verticalCenter
 
-                            Text {
+                            SvgIcon {
                                 anchors.centerIn: parent
-                                verticalAlignment: Text.AlignVCenter
-                                horizontalAlignment: Text.AlignHCenter
-                                text: AudioData.inputMuted ? Icon.microphoneMuted : Icon.microphone
+                                name: AudioData.inputMuted ? "microphone-muted" : "microphone"
+                                size: 18
                                 color: AudioData.inputMuted ? Theme.overlay0 : Theme.base
-                                font.pixelSize: 16
-                                font.family: Config.moduleFontFamily
                             }
 
                             MouseArea {
