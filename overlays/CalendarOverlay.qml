@@ -69,7 +69,7 @@ PanelWindow {
                     width: 32
                     height: 32
                     radius: 16
-                    icon: "‹"
+                    icon: "caret-left"
                     iconSize: 20
                     text: ""
                     onClicked: {
@@ -100,7 +100,7 @@ PanelWindow {
                     width: 32
                     height: 32
                     radius: 16
-                    icon: "›"
+                    icon: "caret-right"
                     iconSize: 20
                     text: ""
                     onClicked: {

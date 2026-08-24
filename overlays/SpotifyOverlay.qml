@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import "root:/"
+import "root:/components"
 
 PanelWindow {
     id: spotifyOverlay
@@ -300,11 +301,10 @@ PanelWindow {
                     border.color: Config.alpha(Theme.text, 0.4)
                     border.width: 1
 
-                    Text {
+                    SvgIcon {
                         anchors.centerIn: parent
-                        text: "󰒮"
-                        font.pixelSize: 24
-                        font.family: Config.moduleFontFamily
+                        name: "skip-back"
+                        size: 24
                         color: Theme.text
                     }
 
@@ -332,11 +332,10 @@ PanelWindow {
                     border.color: Theme.green
                     border.width: 2
 
-                    Text {
+                    SvgIcon {
                         anchors.centerIn: parent
-                        text: spotifyOverlay.status === "Playing" ? "󰏤" : "󰐊"
-                        font.pixelSize: 24
-                        font.family: Config.moduleFontFamily
+                        name: spotifyOverlay.status === "Playing" ? "pause" : "play"
+                        size: 24
                         color: Theme.base
                     }
 
@@ -363,11 +362,10 @@ PanelWindow {
                     border.color: Config.alpha(Theme.text, 0.4)
                     border.width: 1
 
-                    Text {
+                    SvgIcon {
                         anchors.centerIn: parent
-                        text: "󰒭"
-                        font.pixelSize: 24
-                        font.family: Config.moduleFontFamily
+                        name: "skip-forward"
+                        size: 24
                         color: Theme.text
                     }
 

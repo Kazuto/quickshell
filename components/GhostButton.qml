@@ -31,13 +31,11 @@ Rectangle {
         anchors.centerIn: parent
         spacing: ghostButton.text.length > 0 && ghostButton.icon.length > 0 ? 10 : 0
 
-        Text {
-            text: ghostButton.icon
+        SvgIcon {
+            name: ghostButton.icon
+            size: ghostButton.iconSize
             color: ghostButton.iconColor
-            font.pixelSize: ghostButton.iconSize
-            font.family: Config.moduleFontFamily
             anchors.verticalCenter: parent.verticalCenter
-            verticalAlignment: Text.AlignVCenter
             visible: ghostButton.icon.length > 0
         }
 

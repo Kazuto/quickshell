@@ -1,28 +1,37 @@
 import QtQuick
 import "root:/"
 import "root:/singletons"
+import "root:/components"
 
 Rectangle {
-    implicitWidth: bluetoothText.implicitWidth + Config.moduleHorizontalPadding
+    implicitWidth: bluetoothRow.implicitWidth + Config.moduleHorizontalPadding
     implicitHeight: Config.barHeight
     color: bluetoothMouseArea.containsMouse ? Config.moduleHoverBackground : Config.moduleBackground
     radius: Config.moduleRadius
 
-    Text {
-        id: bluetoothText
+    Row {
+        id: bluetoothRow
         anchors.centerIn: parent
-        text: {
-            if (!BluetoothData.powered) {
-                return Icon.bluetooth + " Off"
-            } else if (BluetoothData.connectedDevice) {
-                return Icon.bluetooth + " " + BluetoothData.connectedDevice
-            } else {
-                return Icon.bluetooth + " On"
-            }
+        spacing: 6
+
+        SvgIcon {
+            name: "bluetooth"
+            size: Config.moduleFontSize
+            color: BluetoothData.powered ? Theme.sky : Theme.overlay0
+            anchors.verticalCenter: parent.verticalCenter
         }
-        color: BluetoothData.powered ? Theme.sky : Theme.overlay0
-        font.pixelSize: Config.moduleFontSize
-        font.family: Config.moduleFontFamily
+
+        Text {
+            text: {
+                if (!BluetoothData.powered) return "Off"
+                if (BluetoothData.connectedDevice) return BluetoothData.connectedDevice
+                return "On"
+            }
+            color: BluetoothData.powered ? Theme.sky : Theme.overlay0
+            font.pixelSize: Config.moduleFontSize
+            font.family: Config.moduleFontFamily
+            anchors.verticalCenter: parent.verticalCenter
+        }
     }
 
     MouseArea {
@@ -30,8 +39,6 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            AppState.toggleBluetoothOverlay()
-        }
+        onClicked: AppState.toggleBluetoothOverlay()
     }
 }

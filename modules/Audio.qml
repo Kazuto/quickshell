@@ -1,6 +1,7 @@
 import QtQuick
 import "root:/"
 import "root:/singletons"
+import "root:/components"
 
 Rectangle {
     implicitWidth: audioRow.implicitWidth + Config.moduleHorizontalPadding
@@ -14,33 +15,45 @@ Rectangle {
         spacing: 8
 
         // Volume
-        Text {
+        Row {
+            spacing: 5
             anchors.verticalCenter: parent.verticalCenter
-            text: {
-                if (AudioData.outputMuted) {
-                    return Icon.volumeMuted + " Muted"
-                } else {
-                    return Icon.volume + " " + AudioData.outputVolume + "%"
-                }
+
+            SvgIcon {
+                name: AudioData.outputMuted ? "volume-muted" : "volume"
+                size: Config.moduleFontSize
+                color: AudioData.outputMuted ? Theme.overlay0 : Theme.mauve
+                anchors.verticalCenter: parent.verticalCenter
             }
-            color: AudioData.outputMuted ? Theme.overlay0 : Theme.mauve
-            font.pixelSize: Config.moduleFontSize
-            font.family: Config.moduleFontFamily
+
+            Text {
+                text: AudioData.outputMuted ? "Muted" : AudioData.outputVolume + "%"
+                color: AudioData.outputMuted ? Theme.overlay0 : Theme.mauve
+                font.pixelSize: Config.moduleFontSize
+                font.family: Config.moduleFontFamily
+                anchors.verticalCenter: parent.verticalCenter
+            }
         }
 
         // Microphone
-        Text {
+        Row {
+            spacing: 5
             anchors.verticalCenter: parent.verticalCenter
-            text: {
-                if (AudioData.inputMuted) {
-                    return Icon.microphoneMuted + " Muted"
-                } else {
-                    return Icon.microphone + " " + AudioData.inputVolume + "%"
-                }
+
+            SvgIcon {
+                name: AudioData.inputMuted ? "microphone-muted" : "microphone"
+                size: Config.moduleFontSize
+                color: AudioData.inputMuted ? Theme.overlay0 : Theme.mauve
+                anchors.verticalCenter: parent.verticalCenter
             }
-            color: AudioData.inputMuted ? Theme.overlay0 : Theme.mauve
-            font.pixelSize: Config.moduleFontSize
-            font.family: Config.moduleFontFamily
+
+            Text {
+                text: AudioData.inputMuted ? "Muted" : AudioData.inputVolume + "%"
+                color: AudioData.inputMuted ? Theme.overlay0 : Theme.mauve
+                font.pixelSize: Config.moduleFontSize
+                font.family: Config.moduleFontFamily
+                anchors.verticalCenter: parent.verticalCenter
+            }
         }
     }
 

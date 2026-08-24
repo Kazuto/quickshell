@@ -1,8 +1,10 @@
 import QtQuick
 import "root:/"
+import "root:/components"
 
 Rectangle {
-    implicitWidth: clockText.implicitWidth + Config.moduleHorizontalPadding
+    id: clockRect
+    implicitWidth: clockRow.implicitWidth + Config.moduleHorizontalPadding
     implicitHeight: Config.barHeight
     color: clockMouseArea.containsMouse ? Config.moduleHoverBackground : Config.moduleBackground
     radius: Config.moduleRadius
@@ -11,20 +13,33 @@ Rectangle {
         ColorAnimation { duration: Config.animationDuration }
     }
 
-    Text {
-        id: clockText
+    Row {
+        id: clockRow
         anchors.centerIn: parent
-        text: Icon.calendar + " " + Qt.formatDateTime(new Date(), Config.clockFormat)
-        color: Theme.blue
-        font.pixelSize: Config.moduleFontSize
-        font.family: Config.moduleFontFamily
+        spacing: 6
+
+        SvgIcon {
+            name: "calendar"
+            size: Config.moduleFontSize
+            color: Theme.blue
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Text {
+            id: clockText
+            text: Qt.formatDateTime(new Date(), Config.clockFormat).trim()
+            color: Theme.blue
+            font.pixelSize: Config.moduleFontSize
+            font.family: Config.moduleFontFamily
+            anchors.verticalCenter: parent.verticalCenter
+        }
     }
 
     Timer {
         interval: Config.clockShowSeconds ? 1000 : 60000
         running: true
         repeat: true
-        onTriggered: clockText.text = Qt.formatDateTime(new Date(), Config.clockFormat)
+        onTriggered: clockText.text = Qt.formatDateTime(new Date(), Config.clockFormat).trim()
     }
 
     MouseArea {

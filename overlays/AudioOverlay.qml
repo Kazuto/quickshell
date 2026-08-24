@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Wayland
 import "root:/"
 import "root:/singletons"
+import "root:/components"
 
 PanelWindow {
     id: audioOverlay
@@ -102,11 +103,10 @@ PanelWindow {
                                     width: parent.width
                                     spacing: 10
 
-                                    Text {
-                                        text: modelData.muted ? Icon.volumeMuted : Icon.volume
+                                    SvgIcon {
+                                        name: modelData.muted ? "volume-muted" : "volume"
+                                        size: 18
                                         color: modelData.muted ? Theme.overlay0 : Theme.mauve
-                                        font.pixelSize: 18
-                                        font.family: Config.moduleFontFamily
                                     }
 
                                     Text {
@@ -232,11 +232,10 @@ PanelWindow {
                                     width: parent.width
                                     spacing: 10
 
-                                    Text {
-                                        text: modelData.muted ? Icon.microphoneMuted : Icon.microphone
+                                    SvgIcon {
+                                        name: modelData.muted ? "microphone-muted" : "microphone"
+                                        size: 18
                                         color: modelData.muted ? Theme.overlay0 : Theme.mauve
-                                        font.pixelSize: 18
-                                        font.family: Config.moduleFontFamily
                                     }
 
                                     Text {

@@ -1,20 +1,34 @@
 import QtQuick
 import "root:/"
 import "root:/singletons"
+import "root:/components"
 
 Rectangle {
-    implicitWidth: notifText.implicitWidth + Config.moduleHorizontalPadding
+    implicitWidth: notifRow.implicitWidth + Config.moduleHorizontalPadding
     implicitHeight: Config.barHeight
     color: notifMouseArea.containsMouse ? Config.moduleHoverBackground : Config.moduleBackground
     radius: Config.moduleRadius
 
-    Text {
-        id: notifText
+    Row {
+        id: notifRow
         anchors.centerIn: parent
-        text: "󰂚 " + NotificationData.count
-        color: NotificationData.paused ? Theme.overlay0 : (NotificationData.count > 0 ? Theme.yellow : Theme.overlay0)
-        font.pixelSize: Config.moduleFontSize
-        font.family: Config.moduleFontFamily
+        spacing: 6
+
+        SvgIcon {
+            name: NotificationData.paused ? "bell-slash" : "bell"
+            size: Config.moduleFontSize
+            color: NotificationData.paused ? Theme.overlay0 : (NotificationData.count > 0 ? Theme.yellow : Theme.overlay0)
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Text {
+            text: NotificationData.count
+            color: NotificationData.paused ? Theme.overlay0 : (NotificationData.count > 0 ? Theme.yellow : Theme.overlay0)
+            font.pixelSize: Config.moduleFontSize
+            font.family: Config.moduleFontFamily
+            anchors.verticalCenter: parent.verticalCenter
+            visible: NotificationData.count > 0
+        }
     }
 
     MouseArea {

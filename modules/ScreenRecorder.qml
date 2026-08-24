@@ -1,5 +1,6 @@
 import QtQuick
 import "root:/"
+import "root:/components"
 
 Rectangle {
     implicitWidth: Config.barHeight
@@ -11,13 +12,11 @@ Rectangle {
         ColorAnimation { duration: Config.animationDuration }
     }
 
-    Text {
-        id: recorderText
+    SvgIcon {
         anchors.centerIn: parent
-        text: Icon.record  // Recording circle icon
+        name: "record"
+        size: Config.moduleFontSize
         color: AppState.isRecording ? Theme.red : Theme.overlay0
-        font.pixelSize: Config.moduleFontSize
-        font.family: Config.moduleFontFamily
     }
 
     MouseArea {

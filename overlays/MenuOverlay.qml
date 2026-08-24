@@ -62,12 +62,16 @@ PanelWindow {
             spacing: 20
 
             // Header
-            Text {
-                text: Icon.ubuntu + " System"
-                color: Theme.text
-                font.pixelSize: 18
-                font.bold: true
-                font.family: Config.moduleFontFamily
+            Row {
+                spacing: 8
+                Text {
+                    text: Icon.ubuntu
+                    color: Theme.text
+                    font.pixelSize: 18
+                    font.family: Config.moduleFontFamily
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                Text { text: "System"; color: Theme.text; font.pixelSize: 18; font.bold: true; font.family: Config.moduleFontFamily }
             }
 
             Rectangle {
@@ -189,7 +193,7 @@ PanelWindow {
                  GhostButton {
                         width: parent.width / 2
                     text: "Lock"
-                    icon: Icon.lock
+                    icon: "lock"
                     onClicked: {
                         Process.exec("hyprlock")
                         AppState.toggleMenuOverlay()
@@ -199,7 +203,7 @@ PanelWindow {
                 GhostButton {
                         width: parent.width / 2
                     text: "Logout"
-                    icon: Icon.logout
+                    icon: "logout"
                     onClicked: {
                         Process.exec("hyprctl", "dispatch", "exit")
                         AppState.toggleMenuOverlay()
@@ -213,7 +217,7 @@ PanelWindow {
                   GhostButton {
                         width: parent.width / 2
                     text: "Reboot"
-                    icon: Icon.refresh
+                    icon: "refresh"
                     iconColor: Theme.yellow
                     onClicked: {
                         Process.exec("systemctl", "reboot")
@@ -223,7 +227,7 @@ PanelWindow {
                 GhostButton {
                         width: parent.width / 2
                     text: "Shutdown"
-                    icon: Icon.power
+                    icon: "power"
                     iconColor: Theme.red
                     onClicked: {
                         Process.exec("systemctl", "poweroff")

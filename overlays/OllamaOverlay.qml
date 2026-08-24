@@ -69,7 +69,12 @@ PanelWindow {
                 Text {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: Icon.ollama + " Ollama"
+                    Row {
+                    spacing: 8
+                    anchors.verticalCenter: parent.verticalCenter
+                    SvgIcon { name: "ollama"; size: 18; color: Theme.text; anchors.verticalCenter: parent.verticalCenter }
+                    Text { text: "Ollama"; color: Theme.text; font.pixelSize: 18; font.bold: true; font.family: Config.moduleFontFamily }
+                }
                     color: Theme.text
                     font.pixelSize: 18
                     font.bold: true
@@ -155,7 +160,7 @@ PanelWindow {
                     width: 28
                     height: 28
                     radius: 14
-                    icon: Icon.refresh
+                    icon: "refresh"
                     iconSize: 14
                     text: ""
                     onClicked: OllamaData.refresh()

@@ -62,7 +62,7 @@ PanelWindow {
                 PowerButton {
                     label: "Lock"
                     keyHint: "L"
-                    icon: Icon.lock
+                    icon: "lock"
                     accentColor: Theme.yellow
                     onActivated: {
                         Process.exec("hyprlock")
@@ -74,7 +74,7 @@ PanelWindow {
                 PowerButton {
                     label: "Logout"
                     keyHint: "E"
-                    icon: Icon.logout
+                    icon: "logout"
                     accentColor: Theme.peach
                     onActivated: {
                         Process.exec("hyprctl", ["dispatch", "exit"])
@@ -86,7 +86,7 @@ PanelWindow {
                 PowerButton {
                     label: "Reboot"
                     keyHint: "R"
-                    icon: Icon.refresh
+                    icon: "refresh"
                     accentColor: Theme.green
                     onActivated: {
                         Process.exec("systemctl", ["reboot"])
@@ -97,7 +97,7 @@ PanelWindow {
                 PowerButton {
                     label: "Shutdown"
                     keyHint: "S"
-                    icon: Icon.power
+                    icon: "power"
                     accentColor: Theme.red
                     onActivated: {
                         Process.exec("systemctl", ["poweroff"])
@@ -108,7 +108,7 @@ PanelWindow {
                 PowerButton {
                     label: "Suspend"
                     keyHint: "U"
-                    icon: Icon.suspend
+                    icon: "suspend"
                     accentColor: Theme.lavender
                     onActivated: {
                         Process.exec("systemctl", ["suspend"])

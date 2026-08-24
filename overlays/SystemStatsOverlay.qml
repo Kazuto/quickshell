@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import "root:/"
 import "root:/singletons"
+import "root:/components"
 
 PanelWindow {
     id: systemStatsOverlay
@@ -54,12 +55,10 @@ PanelWindow {
             spacing: 20
 
             // Header
-            Text {
-                text: "System Monitor"
-                color: Theme.text
-                font.pixelSize: 18
-                font.bold: true
-                font.family: Config.moduleFontFamily
+            Row {
+                spacing: 8
+                SvgIcon { name: "monitor"; size: 18; color: Theme.text; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: "System Monitor"; color: Theme.text; font.pixelSize: 18; font.bold: true; font.family: Config.moduleFontFamily }
             }
 
             // CPU Section
@@ -74,7 +73,12 @@ PanelWindow {
                     Text {
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
-                        text: Icon.cpu + " CPU"
+                        Row {
+                        spacing: 6
+                        anchors.verticalCenter: parent.verticalCenter
+                        SvgIcon { name: "cpu"; size: 14; color: Theme.sky; anchors.verticalCenter: parent.verticalCenter }
+                        Text { text: "CPU"; color: Theme.sky; font.pixelSize: 14; font.bold: true; font.family: Config.moduleFontFamily }
+                    }
                         color: Theme.sky
                         font.pixelSize: 14
                         font.bold: true
@@ -286,7 +290,12 @@ PanelWindow {
                     Text {
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
-                        text: Icon.memory + " Memory"
+                        Row {
+                        spacing: 6
+                        anchors.verticalCenter: parent.verticalCenter
+                        SvgIcon { name: "memory"; size: 14; color: Theme.green; anchors.verticalCenter: parent.verticalCenter }
+                        Text { text: "Memory"; color: Theme.green; font.pixelSize: 14; font.bold: true; font.family: Config.moduleFontFamily }
+                    }
                         color: Theme.green
                         font.pixelSize: 14
                         font.bold: true
@@ -380,7 +389,12 @@ PanelWindow {
                     Text {
                         anchors.left: parent.left
                         anchors.verticalCenter: parent.verticalCenter
-                        text: Icon.network + " Network"
+                        Row {
+                        spacing: 6
+                        anchors.verticalCenter: parent.verticalCenter
+                        SvgIcon { name: "network"; size: 14; color: Theme.mauve; anchors.verticalCenter: parent.verticalCenter }
+                        Text { text: "Network"; color: Theme.mauve; font.pixelSize: 14; font.bold: true; font.family: Config.moduleFontFamily }
+                    }
                         color: Theme.mauve
                         font.pixelSize: 14
                         font.bold: true
@@ -393,14 +407,22 @@ PanelWindow {
                         spacing: 8
 
                         Text {
-                            text: Icon.downArrow + " " + SystemStatsData.networkSpeedDown
+                            Row {
+                            spacing: 4
+                            SvgIcon { name: "arrow-down"; size: 12; color: Theme.sky; anchors.verticalCenter: parent.verticalCenter }
+                            Text { text: SystemStatsData.networkSpeedDown; color: Theme.sky; font.pixelSize: 12; font.family: Config.moduleFontFamily }
+                        }
                             color: Theme.sky
                             font.pixelSize: 12
                             font.family: Config.moduleFontFamily
                         }
 
                         Text {
-                            text: Icon.upArrow + " " + SystemStatsData.networkSpeedUp
+                            Row {
+                            spacing: 4
+                            SvgIcon { name: "arrow-up"; size: 12; color: Theme.peach; anchors.verticalCenter: parent.verticalCenter }
+                            Text { text: SystemStatsData.networkSpeedUp; color: Theme.peach; font.pixelSize: 12; font.family: Config.moduleFontFamily }
+                        }
                             color: Theme.peach
                             font.pixelSize: 12
                             font.family: Config.moduleFontFamily
@@ -512,12 +534,10 @@ PanelWindow {
                 width: parent.width
                 spacing: 10
 
-                Text {
-                    text: "🌡 Storage Temperature"
-                    color: Theme.peach
-                    font.pixelSize: 14
-                    font.bold: true
-                    font.family: Config.moduleFontFamily
+                Row {
+                    spacing: 6
+                    SvgIcon { name: "thermometer"; size: 14; color: Theme.peach; anchors.verticalCenter: parent.verticalCenter }
+                    Text { text: "Storage Temperature"; color: Theme.peach; font.pixelSize: 14; font.bold: true; font.family: Config.moduleFontFamily }
                 }
 
                 Column {

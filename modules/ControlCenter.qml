@@ -1,19 +1,19 @@
 import QtQuick
 import "root:/"
+import "root:/components"
 
 Rectangle {
-    implicitWidth: controlCenterText.implicitWidth + Config.moduleHorizontalPadding
+    implicitWidth: Config.barHeight
     implicitHeight: Config.barHeight
     color: controlCenterMouseArea.containsMouse ? Config.moduleHoverBackground : Config.moduleBackground
     radius: Config.moduleRadius
 
-    Text {
+    SvgIcon {
         id: controlCenterText
         anchors.centerIn: parent
-        text: Icon.sliders  // Grid icon for control center
+        name: "control-center"
+        size: Config.moduleFontSize
         color: Theme.peach
-        font.pixelSize: Config.moduleFontSize
-        font.family: Config.moduleFontFamily
     }
 
     MouseArea {

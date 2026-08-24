@@ -510,12 +510,11 @@ PanelWindow {
                         color: backBtMouseArea.containsMouse ? Theme.surface1 : Theme.surface0
                         anchors.verticalCenter: parent.verticalCenter
 
-                        Text {
+                        SvgIcon {
                             anchors.centerIn: parent
-                            text: Icon.back
+                            name: "arrow-left"
+                            size: 16
                             color: Theme.text
-                            font.pixelSize: 16
-                            font.family: Config.moduleFontFamily
                         }
 
                         MouseArea {
@@ -561,11 +560,10 @@ PanelWindow {
                             }
                             spacing: 15
 
-                            Text {
-                                text: Icon.bluetooth
+                            SvgIcon {
+                                name: "bluetooth"
+                                size: 20
                                 color: modelData.connected ? Theme.green : Theme.overlay0
-                                font.pixelSize: 20
-                                font.family: Config.moduleFontFamily
                             }
 
                             Column {
@@ -633,12 +631,11 @@ PanelWindow {
                         color: backAudioMouseArea.containsMouse ? Theme.surface1 : Theme.surface0
                         anchors.verticalCenter: parent.verticalCenter
 
-                        Text {
+                        SvgIcon {
                             anchors.centerIn: parent
-                            text: Icon.back
+                            name: "arrow-left"
+                            size: 16
                             color: Theme.text
-                            font.pixelSize: 16
-                            font.family: Config.moduleFontFamily
                         }
 
                         MouseArea {
@@ -688,12 +685,11 @@ PanelWindow {
                             width: parent.width - 30
                             spacing: 15
 
-                            Text {
+                            SvgIcon {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: modelData.muted ? Icon.volumeMuted : Icon.volume
+                                name: modelData.muted ? "volume-muted" : "volume"
+                                size: 18
                                 color: modelData.muted ? Theme.overlay0 : Theme.mauve
-                                font.pixelSize: 18
-                                font.family: Config.moduleFontFamily
                             }
 
                             Text {
@@ -746,12 +742,11 @@ PanelWindow {
                             width: parent.width - 30
                             spacing: 15
 
-                            Text {
+                            SvgIcon {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: modelData.muted ? Icon.microphoneMuted : Icon.microphone
+                                name: modelData.muted ? "microphone-muted" : "microphone"
+                                size: 18
                                 color: modelData.muted ? Theme.overlay0 : Theme.mauve
-                                font.pixelSize: 18
-                                font.family: Config.moduleFontFamily
                             }
 
                             Text {
@@ -809,12 +804,11 @@ PanelWindow {
                         color: backWifiMouseArea.containsMouse ? Theme.surface1 : Theme.surface0
                         anchors.verticalCenter: parent.verticalCenter
 
-                        Text {
+                        SvgIcon {
                             anchors.centerIn: parent
-                            text: Icon.back
+                            name: "arrow-left"
+                            size: 16
                             color: Theme.text
-                            font.pixelSize: 16
-                            font.family: Config.moduleFontFamily
                         }
 
                         MouseArea {
@@ -862,11 +856,10 @@ PanelWindow {
                             }
                             spacing: 12
 
-                            Text {
-                                text: Icon.wifi
+                            SvgIcon {
+                                name: "wifi"
+                                size: 18
                                 color: modelData.active ? Theme.blue : Theme.overlay0
-                                font.pixelSize: 18
-                                font.family: Config.moduleFontFamily
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 

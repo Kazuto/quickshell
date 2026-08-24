@@ -2,7 +2,7 @@ import QtQuick
 import "root:/"
 
 Rectangle {
-    implicitWidth: Config.barHeight  // Square (1:1 aspect ratio)
+    implicitWidth: Config.barHeight
     implicitHeight: Config.barHeight
     color: menuMouseArea.containsMouse ? Config.moduleHoverBackground : Config.moduleBackground
     radius: Config.moduleRadius
@@ -12,10 +12,9 @@ Rectangle {
     }
 
     Text {
-        id: menuText
         anchors.centerIn: parent
         text: Icon.ubuntu
-        color: Theme.blue 
+        color: Theme.blue
         font.pixelSize: Config.moduleFontSize
         font.family: Config.moduleFontFamily
     }

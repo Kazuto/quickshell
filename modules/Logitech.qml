@@ -1,10 +1,11 @@
 import QtQuick
 import Quickshell.Io
 import "root:/"
+import "root:/components"
 
 Rectangle {
     id: root
-    implicitWidth: mouseText.implicitWidth + Config.moduleHorizontalPadding
+    implicitWidth: Config.barHeight
     implicitHeight: Config.barHeight
     color: logitechMouseArea.containsMouse ? Config.moduleHoverBackground : Config.moduleBackground
     radius: Config.moduleRadius
@@ -17,13 +18,11 @@ Rectangle {
         ColorAnimation { duration: Config.animationDuration }
     }
 
-    Text {
-        id: mouseText
+    SvgIcon {
         anchors.centerIn: parent
-        text: Icon.mouse
+        name: "mouse"
+        size: Config.moduleFontSize
         color: root.batteryLow ? Theme.red : Theme.overlay2
-        font.pixelSize: Config.moduleFontSize
-        font.family: Config.moduleFontFamily
     }
 
     Process {

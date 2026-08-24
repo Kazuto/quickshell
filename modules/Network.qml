@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell.Io
 import "root:/"
+import "root:/components"
 
 Rectangle {
     id: root
@@ -19,14 +20,27 @@ Rectangle {
         ColorAnimation { duration: Config.animationDuration }
     }
 
-    Text {
+    Row {
         id: vpnText
         anchors.centerIn: parent
-        text: Icon.vpn + " VPN"
-        color: root.vpnConnected ? Theme.green : Theme.overlay0
-        font.pixelSize: Config.moduleFontSize
-        font.family: Config.moduleFontFamily
-        opacity: root.vpnBusy ? 0.5 : 1.0
+        spacing: 6
+
+        SvgIcon {
+            name: "vpn"
+            size: Config.moduleFontSize
+            color: root.vpnConnected ? Theme.green : Theme.overlay0
+            anchors.verticalCenter: parent.verticalCenter
+            opacity: root.vpnBusy ? 0.5 : 1.0
+        }
+
+        Text {
+            text: "VPN"
+            color: root.vpnConnected ? Theme.green : Theme.overlay0
+            font.pixelSize: Config.moduleFontSize
+            font.family: Config.moduleFontFamily
+            anchors.verticalCenter: parent.verticalCenter
+            opacity: root.vpnBusy ? 0.5 : 1.0
+        }
     }
 
     // Checks whether the VPN connection is currently active

@@ -68,14 +68,12 @@ PanelWindow {
                 width: parent.width
                 height: 30
 
-                Text {
+                Row {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Notifications"
-                    color: Theme.text
-                    font.pixelSize: 16
-                    font.bold: true
-                    font.family: Config.moduleFontFamily
+                    spacing: 8
+                    SvgIcon { name: "bell"; size: 16; color: Theme.text; anchors.verticalCenter: parent.verticalCenter }
+                    Text { text: "Notifications"; color: Theme.text; font.pixelSize: 16; font.bold: true; font.family: Config.moduleFontFamily }
                 }
 
                 Row {

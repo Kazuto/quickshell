@@ -1,9 +1,10 @@
 import QtQuick
 import Quickshell.Io
 import "root:/"
+import "root:/components"
 
 Rectangle {
-    implicitWidth: spotifyText.implicitWidth + Config.moduleHorizontalPadding
+    implicitWidth: spotifyRow.implicitWidth + Config.moduleHorizontalPadding
     implicitHeight: Config.barHeight
     color: spotifyMouseArea.containsMouse ? Config.moduleHoverBackground : Config.moduleBackground
     radius: Config.moduleRadius
@@ -18,7 +19,6 @@ Rectangle {
         ColorAnimation { duration: Config.animationDuration }
     }
 
-    // Get Spotify metadata
     Process {
         id: metadataProcess
         running: true
@@ -37,7 +37,6 @@ Rectangle {
 
         stderr: SplitParser {
             onRead: data => {
-                // Spotify not running or no player found
                 artist = ""
                 title = ""
                 status = ""
@@ -45,7 +44,6 @@ Rectangle {
         }
     }
 
-    // Update every second
     Timer {
         interval: 1000
         running: true
@@ -56,21 +54,31 @@ Rectangle {
         }
     }
 
-    Text {
-        id: spotifyText
+    Row {
+        id: spotifyRow
         anchors.centerIn: parent
-        text: {
-            if (!hasSpotify) return Icon.spotify + " Not running"
+        spacing: 6
 
-            var songText = artist && title ? artist + " - " + title : (title || artist || "Unknown")
-
-            return Icon.spotify + " " + songText
+        SvgIcon {
+            name: "spotify"
+            size: Config.moduleFontSize
+            color: isPlaying ? Theme.green : Theme.overlay0
+            anchors.verticalCenter: parent.verticalCenter
         }
-        color: isPlaying ? Theme.green : Theme.overlay0
-        font.pixelSize: Config.moduleFontSize
-        font.family: Config.moduleFontFamily
-        elide: Text.ElideRight
-        maximumLineCount: 1
+
+        Text {
+            id: spotifyText
+            anchors.verticalCenter: parent.verticalCenter
+            text: {
+                if (!hasSpotify) return "Not running"
+                return artist && title ? artist + " - " + title : (title || artist || "Unknown")
+            }
+            color: isPlaying ? Theme.green : Theme.overlay0
+            font.pixelSize: Config.moduleFontSize
+            font.family: Config.moduleFontFamily
+            elide: Text.ElideRight
+            maximumLineCount: 1
+        }
     }
 
     MouseArea {
@@ -78,8 +86,6 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            AppState.toggleSpotifyOverlay()
-        }
+        onClicked: AppState.toggleSpotifyOverlay()
     }
 }

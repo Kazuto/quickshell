@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import "root:/"
 import "root:/singletons"
+import "root:/components"
 
 PanelWindow {
     id: bluetoothOverlay
@@ -130,11 +131,10 @@ PanelWindow {
                             }
                             spacing: 15
 
-                            Text {
-                                text: Icon.bluetooth
+                            SvgIcon {
+                                name: "bluetooth"
+                                size: 20
                                 color: modelData.connected ? Theme.green : Theme.overlay0
-                                font.pixelSize: 20
-                                font.family: Config.moduleFontFamily
                             }
 
                             Column {

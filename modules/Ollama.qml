@@ -1,9 +1,10 @@
 import QtQuick
 import "root:/"
 import "root:/singletons"
+import "root:/components"
 
 Rectangle {
-    implicitWidth: ollamaText.implicitWidth + Config.moduleHorizontalPadding
+    implicitWidth: Config.barHeight
     implicitHeight: Config.barHeight
     color: ollamaMouseArea.containsMouse ? Config.moduleHoverBackground : Config.moduleBackground
     radius: Config.moduleRadius
@@ -12,13 +13,11 @@ Rectangle {
         ColorAnimation { duration: Config.animationDuration }
     }
 
-    Text {
-        id: ollamaText
+    SvgIcon {
         anchors.centerIn: parent
-        text: Icon.ollama
+        name: "ollama"
+        size: Config.moduleFontSize
         color: OllamaData.isRunning ? Theme.green : Theme.overlay0
-        font.pixelSize: Config.moduleFontSize
-        font.family: Config.moduleFontFamily
     }
 
     MouseArea {

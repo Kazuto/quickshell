@@ -147,12 +147,11 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     visible: selectingWindow || selectingMonitor
 
-                    Text {
+                    SvgIcon {
                         anchors.centerIn: parent
-                        text: Icon.back
+                        name: "arrow-left"
+                        size: 16
                         color: Theme.text
-                        font.pixelSize: 16
-                        font.family: Config.moduleFontFamily
                     }
 
                     MouseArea {

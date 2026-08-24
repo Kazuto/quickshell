@@ -56,7 +56,11 @@ PanelWindow {
 
             // Header
             Text {
-                text: Icon.clock + " Timer"
+                Row {
+                spacing: 8
+                SvgIcon { name: "timer"; size: 18; color: Theme.text; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: "Timer"; color: Theme.text; font.pixelSize: 18; font.bold: true; font.family: Config.moduleFontFamily }
+            }
                 color: Theme.text
                 font.pixelSize: 18
                 font.bold: true

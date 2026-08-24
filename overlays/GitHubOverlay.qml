@@ -69,7 +69,12 @@ PanelWindow {
                 Text {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    text: Icon.github + " GitHub"
+                    Row {
+                    spacing: 8
+                    anchors.verticalCenter: parent.verticalCenter
+                    SvgIcon { name: "github"; size: 18; color: Theme.text; anchors.verticalCenter: parent.verticalCenter }
+                    Text { text: "GitHub"; color: Theme.text; font.pixelSize: 18; font.bold: true; font.family: Config.moduleFontFamily }
+                }
                     color: Theme.text
                     font.pixelSize: 18
                     font.bold: true
@@ -83,7 +88,7 @@ PanelWindow {
                     width: 32
                     height: 32
                     radius: 16
-                    icon: Icon.refresh
+                    icon: "refresh"
                     iconSize: 16
                     text: ""
                     onClicked: GitHubData.refresh()

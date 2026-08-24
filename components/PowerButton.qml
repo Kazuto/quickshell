@@ -1,5 +1,6 @@
 import QtQuick
 import "root:/"
+import "root:/components"
 
 Item {
     id: powerButton
@@ -41,12 +42,11 @@ Item {
             anchors.centerIn: parent
             spacing: 12
 
-            Text {
+            SvgIcon {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: powerButton.icon
+                name: powerButton.icon
+                size: 36
                 color: powerButton.accentColor
-                font.pixelSize: 36
-                font.family: Config.moduleFontFamily
             }
 
             Text {
