@@ -1,0 +1,4 @@
+module components
+
+SvgIcon 1.0 SvgIcon.qml
+GhostButton 1.0 GhostButton.qml
