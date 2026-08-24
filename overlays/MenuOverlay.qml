@@ -19,6 +19,13 @@ PanelWindow {
     color: "transparent"
     visible: true
 
+    function run(cmd) {
+        Qt.createQmlObject(
+            'import Quickshell.Io; Process { command: ' + JSON.stringify(cmd) + '; running: true }',
+            menuOverlay
+        )
+    }
+
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
@@ -195,7 +202,7 @@ PanelWindow {
                     text: "Lock"
                     icon: "lock"
                     onClicked: {
-                        Process.exec("hyprlock")
+                        run(["hyprlock"])
                         AppState.toggleMenuOverlay()
                     }
                 }
@@ -205,7 +212,7 @@ PanelWindow {
                     text: "Logout"
                     icon: "logout"
                     onClicked: {
-                        Process.exec("hyprctl", "dispatch", "exit")
+                        run(["hyprctl", "dispatch", "exit"])
                         AppState.toggleMenuOverlay()
                     }
                 } 
@@ -220,7 +227,7 @@ PanelWindow {
                     icon: "refresh"
                     iconColor: Theme.yellow
                     onClicked: {
-                        Process.exec("systemctl", "reboot")
+                        run(["systemctl", "reboot"])
                     }
                 }
 
@@ -230,7 +237,7 @@ PanelWindow {
                     icon: "power"
                     iconColor: Theme.red
                     onClicked: {
-                        Process.exec("systemctl", "poweroff")
+                        run(["systemctl", "poweroff"])
                     }
                 } 
                 }

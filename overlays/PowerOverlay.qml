@@ -22,6 +22,13 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
+    function run(cmd) {
+        Qt.createQmlObject(
+            'import Quickshell.Io; Process { command: ' + JSON.stringify(cmd) + '; running: true }',
+            powerOverlay
+        )
+    }
+
     // Click outside to close
     MouseArea {
         anchors.fill: parent
@@ -65,7 +72,7 @@ PanelWindow {
                     icon: "lock"
                     accentColor: Theme.yellow
                     onActivated: {
-                        Process.exec("hyprlock")
+                        run(["hyprlock"])
                         AppState.togglePowerOverlay()
                     }
                 }
@@ -77,7 +84,7 @@ PanelWindow {
                     icon: "logout"
                     accentColor: Theme.peach
                     onActivated: {
-                        Process.exec("hyprctl", ["dispatch", "exit"])
+                        run(["hyprctl", "dispatch", "exit"])
                         AppState.togglePowerOverlay()
                     }
                 }
@@ -89,7 +96,7 @@ PanelWindow {
                     icon: "refresh"
                     accentColor: Theme.green
                     onActivated: {
-                        Process.exec("systemctl", ["reboot"])
+                        run(["systemctl", "reboot"])
                     }
                 }
 
@@ -100,7 +107,7 @@ PanelWindow {
                     icon: "power"
                     accentColor: Theme.red
                     onActivated: {
-                        Process.exec("systemctl", ["poweroff"])
+                        run(["systemctl", "poweroff"])
                     }
                 }
 
@@ -111,7 +118,7 @@ PanelWindow {
                     icon: "suspend"
                     accentColor: Theme.lavender
                     onActivated: {
-                        Process.exec("systemctl", ["suspend"])
+                        run(["systemctl", "suspend"])
                         AppState.togglePowerOverlay()
                     }
                 }
@@ -133,21 +140,21 @@ PanelWindow {
             Keys.onPressed: event => {
                 switch (event.key) {
                     case Qt.Key_L:
-                        Process.exec("hyprlock")
+                        run(["hyprlock"])
                         AppState.togglePowerOverlay()
                         break
                     case Qt.Key_E:
-                        Process.exec("hyprctl", ["dispatch", "exit"])
+                        run(["hyprctl", "dispatch", "exit"])
                         AppState.togglePowerOverlay()
                         break
                     case Qt.Key_R:
-                        Process.exec("systemctl", ["reboot"])
+                        run(["systemctl", "reboot"])
                         break
                     case Qt.Key_S:
-                        Process.exec("systemctl", ["poweroff"])
+                        run(["systemctl", "poweroff"])
                         break
                     case Qt.Key_U:
-                        Process.exec("systemctl", ["suspend"])
+                        run(["systemctl", "suspend"])
                         AppState.togglePowerOverlay()
                         break
                     case Qt.Key_Escape:
