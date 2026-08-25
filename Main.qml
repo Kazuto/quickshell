@@ -33,6 +33,7 @@ Rectangle {
             Modules.Logitech {},
             Modules.SystemStats {},
             Modules.ControlCenter {},
+            Modules.Notifications {},
             Modules.Battery {},
             Modules.Clock {},
         ]

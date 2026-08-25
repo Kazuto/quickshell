@@ -81,16 +81,25 @@ PanelWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 10
 
-                    // Pause button
-                    GhostButton {
-                        width: 70
-                        height: 30
-                        radius: 15
-                        text: NotificationData.paused ? "Off" : "On"
-                        icon: NotificationData.paused ? "󰂛" : "󰂚"
-                        iconColor: NotificationData.paused ? Theme.overlay0 : Theme.yellow
-                        fontSize: 12
-                        onClicked: NotificationData.togglePause()
+                    // Pause toggle
+                    Row {
+                        spacing: 8
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Text {
+                            text: "Notify"
+                            color: Theme.subtext0
+                            font.pixelSize: 12
+                            font.family: Config.moduleFontFamily
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        Toggle {
+                            anchors.verticalCenter: parent.verticalCenter
+                            checked: !NotificationData.paused
+                            onColor: Theme.yellow
+                            onToggled: NotificationData.togglePause()
+                        }
                     }
 
                     // Clear all button
