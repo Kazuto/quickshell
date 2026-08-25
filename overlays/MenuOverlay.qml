@@ -212,7 +212,7 @@ PanelWindow {
                     text: "Logout"
                     icon: "logout"
                     onClicked: {
-                        run(["hyprctl", "dispatch", "exit"])
+                        run(["killall", "Hyprland"])
                         AppState.toggleMenuOverlay()
                     }
                 } 

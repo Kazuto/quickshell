@@ -84,7 +84,7 @@ PanelWindow {
                     icon: "logout"
                     accentColor: Theme.peach
                     onActivated: {
-                        run(["hyprctl", "dispatch", "exit"])
+                        run(["killall", "Hyprland"])
                         AppState.togglePowerOverlay()
                     }
                 }
@@ -144,7 +144,7 @@ PanelWindow {
                         AppState.togglePowerOverlay()
                         break
                     case Qt.Key_E:
-                        run(["hyprctl", "dispatch", "exit"])
+                        run(["killall", "Hyprland"])
                         AppState.togglePowerOverlay()
                         break
                     case Qt.Key_R:
