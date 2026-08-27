@@ -5,7 +5,7 @@ import "root:/components"
 
 Rectangle {
     id: root
-    implicitWidth: vpnText.implicitWidth + Config.moduleHorizontalPadding
+    implicitWidth: Config.barHeight
     implicitHeight: Config.barHeight
     color: vpnMouseArea.containsMouse ? Config.moduleHoverBackground : Config.moduleBackground
     radius: Config.moduleRadius
@@ -20,27 +20,13 @@ Rectangle {
         ColorAnimation { duration: Config.animationDuration }
     }
 
-    Row {
+    SvgIcon {
         id: vpnText
         anchors.centerIn: parent
-        spacing: 6
-
-        SvgIcon {
-            name: "vpn"
-            size: Config.moduleFontSize
-            color: root.vpnConnected ? Theme.green : Theme.overlay0
-            anchors.verticalCenter: parent.verticalCenter
-            opacity: root.vpnBusy ? 0.5 : 1.0
-        }
-
-        Text {
-            text: "VPN"
-            color: root.vpnConnected ? Theme.green : Theme.overlay0
-            font.pixelSize: Config.moduleFontSize
-            font.family: Config.moduleFontFamily
-            anchors.verticalCenter: parent.verticalCenter
-            opacity: root.vpnBusy ? 0.5 : 1.0
-        }
+        name: "vpn"
+        size: Config.moduleFontSize
+        color: root.vpnConnected ? Theme.green : Theme.overlay0
+        opacity: root.vpnBusy ? 0.5 : 1.0
     }
 
     // Checks whether the VPN connection is currently active

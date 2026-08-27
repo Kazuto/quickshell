@@ -6,6 +6,7 @@ import "root:/"
 import "./modules" as Modules
 import "./windows" as Windows
 import "./overlays" as Overlays
+import "./components" as Components
 
 Rectangle {
     anchors.fill: parent
@@ -26,18 +27,33 @@ Rectangle {
         ]
 
         rightItems: [
-            Modules.GitHub {},
-            Modules.Network {},
-            Modules.Wifi {},
-            Modules.Bluetooth {},
-            Modules.Audio {},
-            Modules.Timer {},
-            Modules.ScreenRecorder {},
-            Modules.Logitech {},
-            Modules.SystemStats {},
-            Modules.Notifications {},
-            Modules.Battery {},
-            Modules.Clock {},
+            Components.ModuleGroup {
+                items: [
+                    Modules.Notifications { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider {},
+                    Modules.Timer        { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider {},
+                    Modules.ScreenRecorder { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider {},
+                    Modules.GitHub       { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider {},
+                    Modules.Logitech     { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider {},
+                    Modules.Network      { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider {},
+                    Modules.Wifi         { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider {},
+                    Modules.Bluetooth    { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider {},
+                    Modules.Audio        { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider {},
+                    Modules.SystemStats  { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider {},
+                    Modules.Battery      { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider {},
+                    Modules.Clock        { color: "transparent"; radius: 0 },
+                ]
+            },
         ]
     }
 
