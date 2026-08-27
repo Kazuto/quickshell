@@ -21,6 +21,7 @@ PanelWindow {
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+    WlrLayershell.exclusiveZone: -1
 
     function run(cmd) {
         Qt.createQmlObject(
