@@ -145,12 +145,11 @@ PanelWindow {
                                 }
                             }
 
-                            Text {
+                            SvgIcon {
                                 anchors.centerIn: parent
-                                text: TimerData.isPaused ? "▶" : "⏸"
+                                name: TimerData.isPaused ? "play" : "pause"
+                                size: 16
                                 color: Theme.text
-                                font.pixelSize: 18
-                                font.family: Config.moduleFontFamily
                                 z: 1
                             }
                         }
@@ -178,12 +177,11 @@ PanelWindow {
                                 onClicked: TimerData.reset()
                             }
 
-                            Text {
+                            SvgIcon {
                                 anchors.centerIn: parent
-                                text: "↻"
+                                name: "refresh"
+                                size: 16
                                 color: Theme.text
-                                font.pixelSize: 20
-                                font.family: Config.moduleFontFamily
                                 z: 1
                             }
                         }
@@ -217,12 +215,12 @@ PanelWindow {
                                 onClicked: TimerData.stop()
                             }
 
-                            Text {
+                            Rectangle {
                                 anchors.centerIn: parent
-                                text: "⏹"
+                                width: 12
+                                height: 12
+                                radius: 2
                                 color: Theme.red
-                                font.pixelSize: 18
-                                font.family: Config.moduleFontFamily
                                 z: 1
                             }
                         }
