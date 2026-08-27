@@ -7,9 +7,8 @@ Singleton {
     property bool spotifyOverlayVisible: false
     property bool bluetoothOverlayVisible: false
     property bool audioOverlayVisible: false
+    property bool wifiOverlayVisible: false
     property bool notificationsOverlayVisible: false
-    property bool controlCenterOverlayVisible: false
-    property string controlCenterView: "main"  // main, bluetooth, audio
     property bool systemStatsOverlayVisible: false
     property bool githubOverlayVisible: false
     property bool timerOverlayVisible: false
@@ -25,8 +24,8 @@ Singleton {
         spotifyOverlayVisible = false
         bluetoothOverlayVisible = false
         audioOverlayVisible = false
+        wifiOverlayVisible = false
         notificationsOverlayVisible = false
-        controlCenterOverlayVisible = false
         systemStatsOverlayVisible = false
         githubOverlayVisible = false
         timerOverlayVisible = false
@@ -59,25 +58,18 @@ Singleton {
         audioOverlayVisible = !audioOverlayVisible
     }
 
+    function toggleWifiOverlay() {
+        if (!wifiOverlayVisible) {
+            closeAllOverlays()
+        }
+        wifiOverlayVisible = !wifiOverlayVisible
+    }
+
     function toggleNotificationsOverlay() {
         if (!notificationsOverlayVisible) {
             closeAllOverlays()
         }
         notificationsOverlayVisible = !notificationsOverlayVisible
-    }
-
-    function toggleControlCenterOverlay() {
-        if (!controlCenterOverlayVisible) {
-            closeAllOverlays()
-        }
-        controlCenterOverlayVisible = !controlCenterOverlayVisible
-        if (controlCenterOverlayVisible) {
-            controlCenterView = "main"
-        }
-    }
-
-    function setControlCenterView(view) {
-        controlCenterView = view
     }
 
     function toggleSystemStatsOverlay() {

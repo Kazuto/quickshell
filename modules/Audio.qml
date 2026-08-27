@@ -6,62 +6,41 @@ import "root:/components"
 Rectangle {
     implicitWidth: audioRow.implicitWidth + Config.moduleHorizontalPadding
     implicitHeight: Config.barHeight
-    color: audioMouseArea.containsMouse ? Config.moduleHoverBackground : Config.moduleBackground
+    color: audioMouse.containsMouse ? Config.moduleHoverBackground : Config.moduleBackground
     radius: Config.moduleRadius
+
+    Behavior on color { ColorAnimation { duration: Config.animationDuration } }
 
     Row {
         id: audioRow
         anchors.centerIn: parent
-        spacing: 8
+        spacing: 6
 
-        // Volume
-        Row {
-            spacing: 5
+        SvgIcon {
+            name: AudioData.outputMuted ? "volume-muted" : "volume"
+            size: Config.moduleFontSize
+            color: AudioData.outputMuted ? Theme.overlay0 : Theme.mauve
             anchors.verticalCenter: parent.verticalCenter
-
-            SvgIcon {
-                name: AudioData.outputMuted ? "volume-muted" : "volume"
-                size: Config.moduleFontSize
-                color: AudioData.outputMuted ? Theme.overlay0 : Theme.mauve
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            Text {
-                text: AudioData.outputMuted ? "Muted" : AudioData.outputVolume + "%"
-                color: AudioData.outputMuted ? Theme.overlay0 : Theme.mauve
-                font.pixelSize: Config.moduleFontSize
-                font.family: Config.moduleFontFamily
-                anchors.verticalCenter: parent.verticalCenter
-            }
         }
 
-        // Microphone
-        Row {
-            spacing: 5
+        Text {
+            text: AudioData.outputMuted ? "Muted" : AudioData.outputVolume + "%"
+            color: AudioData.outputMuted ? Theme.overlay0 : Theme.mauve
+            font.pixelSize: Config.moduleFontSize
+            font.family: Config.moduleFontFamily
             anchors.verticalCenter: parent.verticalCenter
-
-            SvgIcon {
-                name: AudioData.inputMuted ? "microphone-muted" : "microphone"
-                size: Config.moduleFontSize
-                color: AudioData.inputMuted ? Theme.overlay0 : Theme.mauve
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            Text {
-                text: AudioData.inputMuted ? "Muted" : AudioData.inputVolume + "%"
-                color: AudioData.inputMuted ? Theme.overlay0 : Theme.mauve
-                font.pixelSize: Config.moduleFontSize
-                font.family: Config.moduleFontFamily
-                anchors.verticalCenter: parent.verticalCenter
-            }
         }
     }
 
     MouseArea {
-        id: audioMouseArea
+        id: audioMouse
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: AppState.toggleAudioOverlay()
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: (mouse) => {
+            if (mouse.button === Qt.RightButton) AudioData.toggleOutputMute()
+            else AppState.toggleAudioOverlay()
+        }
     }
 }

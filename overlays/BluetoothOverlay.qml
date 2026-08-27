@@ -58,37 +58,49 @@ PanelWindow {
             spacing: 15
 
             // Header with power toggle
-            Row {
+            Item {
                 width: parent.width
-                spacing: 10
+                height: 30
 
-                Text {
-                    text: "Bluetooth"
-                    color: Theme.text
-                    font.pixelSize: 16
-                    font.bold: true
-                    font.family: Config.moduleFontFamily
+                Row {
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 10
+
+                    SvgIcon {
+                        name: "bluetooth"
+                        size: 18
+                        color: BluetoothData.powered ? Theme.sky : Theme.overlay0
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    Text {
+                        text: "Bluetooth"
+                        color: Theme.text
+                        font.pixelSize: 16
+                        font.bold: true
+                        font.family: Config.moduleFontFamily
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
                 }
 
-                Item { width: parent.width - 200 }
-
                 Rectangle {
-                    width: 60
-                    height: 30
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 52
+                    height: 28
                     color: powerMouseArea.containsMouse ? Theme.surface1 : Theme.surface0
-                    radius: 15
+                    radius: 14
 
                     Rectangle {
-                        width: 26
-                        height: 26
-                        radius: 13
-                        color: BluetoothData.powered ? Theme.green : Theme.overlay0
-                        x: BluetoothData.powered ? parent.width - width - 2 : 2
-                        y: 2
-
-                        Behavior on x {
-                            NumberAnimation { duration: 200 }
-                        }
+                        width: 22
+                        height: 22
+                        radius: 11
+                        color: BluetoothData.powered ? Theme.sky : Theme.overlay0
+                        x: BluetoothData.powered ? parent.width - width - 3 : 3
+                        y: 3
+                        Behavior on x { NumberAnimation { duration: 200 } }
+                        Behavior on color { ColorAnimation { duration: 200 } }
                     }
 
                     MouseArea {

@@ -79,8 +79,7 @@ Singleton {
 
         onRunningChanged: {
             if (running) {
-                connectedSsid = ""
-                connectedSignal = 0
+                // Don't clear — keep stale values visible until new data arrives
             }
         }
     }
@@ -97,10 +96,11 @@ Singleton {
         `]
 
         stdout: SplitParser {
+            property var incoming: []
             onRead: data => {
                 var parts = data.split("|||")
                 if (parts.length >= 3) {
-                    networks = networks.concat([{
+                    incoming = incoming.concat([{
                         active:   parts[0] === "yes",
                         ssid:     parts[1],
                         signal:   parseInt(parts[2]) || 0,
@@ -110,10 +110,17 @@ Singleton {
             }
         }
 
-        onRunningChanged: {
-            if (running) {
-                networks = []
+        onExited: {
+            // Swap in the full new list only when the process finishes,
+            // so the overlay never flashes empty mid-refresh
+            if (networksProcess.stdout.incoming.length > 0) {
+                networks = networksProcess.stdout.incoming
             }
+            networksProcess.stdout.incoming = []
+        }
+
+        onRunningChanged: {
+            if (running) networksProcess.stdout.incoming = []
         }
     }
 

@@ -28,11 +28,13 @@ Rectangle {
         rightItems: [
             Modules.GitHub {},
             Modules.Network {},
+            Modules.Wifi {},
+            Modules.Bluetooth {},
+            Modules.Audio {},
             Modules.Timer {},
             Modules.ScreenRecorder {},
             Modules.Logitech {},
             Modules.SystemStats {},
-            Modules.ControlCenter {},
             Modules.Notifications {},
             Modules.Battery {},
             Modules.Clock {},
@@ -98,17 +100,19 @@ Rectangle {
         visible: AppState.audioOverlayVisible
     }
 
+    // Wifi overlay
+    Overlays.WifiOverlay {
+        id: wifiOverlay
+        visible: AppState.wifiOverlayVisible
+    }
+
     // Notifications overlay
     Overlays.NotificationsOverlay {
         id: notificationsOverlay
         visible: AppState.notificationsOverlayVisible
     }
 
-    // Control Center overlay
-    Overlays.ControlCenterOverlay {
-        id: controlCenterOverlay
-        visible: AppState.controlCenterOverlayVisible
-    }
+    // Control Center overlay removed — replaced by separate Wifi/Audio/Bluetooth overlays
 
     // System Stats overlay
     Overlays.SystemStatsOverlay {
