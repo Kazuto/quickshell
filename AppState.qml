@@ -8,6 +8,7 @@ Singleton {
     property bool bluetoothOverlayVisible: false
     property bool audioOverlayVisible: false
     property bool wifiOverlayVisible: false
+    property bool vpnOverlayVisible: false
     property bool notificationsOverlayVisible: false
     property bool systemStatsOverlayVisible: false
     property bool githubOverlayVisible: false
@@ -25,6 +26,7 @@ Singleton {
         bluetoothOverlayVisible = false
         audioOverlayVisible = false
         wifiOverlayVisible = false
+        vpnOverlayVisible = false
         notificationsOverlayVisible = false
         systemStatsOverlayVisible = false
         githubOverlayVisible = false
@@ -59,10 +61,13 @@ Singleton {
     }
 
     function toggleWifiOverlay() {
-        if (!wifiOverlayVisible) {
-            closeAllOverlays()
-        }
+        if (!wifiOverlayVisible) closeAllOverlays()
         wifiOverlayVisible = !wifiOverlayVisible
+    }
+
+    function toggleVpnOverlay() {
+        if (!vpnOverlayVisible) closeAllOverlays()
+        vpnOverlayVisible = !vpnOverlayVisible
     }
 
     function toggleNotificationsOverlay() {

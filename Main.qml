@@ -122,6 +122,12 @@ Rectangle {
         visible: AppState.wifiOverlayVisible
     }
 
+    // VPN overlay
+    Overlays.VpnOverlay {
+        id: vpnOverlay
+        visible: AppState.vpnOverlayVisible
+    }
+
     // Notifications overlay
     Overlays.NotificationsOverlay {
         id: notificationsOverlay

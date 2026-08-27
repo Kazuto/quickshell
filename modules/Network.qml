@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell.Io
 import "root:/"
+import "root:/singletons"
 import "root:/components"
 
 Rectangle {
@@ -77,9 +78,6 @@ Rectangle {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         enabled: !root.vpnBusy
-        onClicked: {
-            root.vpnBusy = true
-            toggleProcess.running = true
-        }
+        onClicked: AppState.toggleVpnOverlay()
     }
 }
