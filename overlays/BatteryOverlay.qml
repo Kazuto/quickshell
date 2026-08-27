@@ -206,7 +206,7 @@ PanelWindow {
         }
         width: 360
         height: content.implicitHeight + 40
-        color: Config.alpha(Theme.base, 0.97)
+        color: Theme.mantle
         radius: Config.overlayRadius
         border.color: Theme.surface0
         border.width: 1
@@ -283,7 +283,7 @@ PanelWindow {
                     id: barTrack
                     anchors.fill: parent
                     radius: height / 2
-                    color: Theme.surface1
+                    color: Theme.surface0
                 }
 
                 Rectangle {

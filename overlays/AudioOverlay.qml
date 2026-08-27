@@ -44,7 +44,7 @@ PanelWindow {
         }
         width: 400
         height: contentColumn.implicitHeight + 40
-        color: Config.alpha(Theme.base, 0.95)
+        color: Theme.mantle
         radius: Config.overlayRadius
         border.color: Theme.surface0
         border.width: 1
@@ -64,16 +64,45 @@ PanelWindow {
             }
             spacing: 20
 
+            // Header
+            Item {
+                width: parent.width
+                height: 28
+
+                Row {
+                    anchors.left: parent.left
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 10
+
+                    SvgIcon {
+                        name: AudioData.outputMuted ? "volume-muted" : "volume"
+                        size: 18
+                        color: Theme.mauve
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    Text {
+                        text: "Audio"
+                        color: Theme.text
+                        font.pixelSize: 16
+                        font.bold: true
+                        font.family: Config.moduleFontFamily
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
+
             // Output Devices Section
             Column {
                 width: parent.width
                 spacing: 15
 
                 Text {
-                    text: "Output Devices"
-                    color: Theme.text
-                    font.pixelSize: 16
+                    text: "OUTPUT"
+                    color: Theme.overlay0
+                    font.pixelSize: 10
                     font.bold: true
+                    font.letterSpacing: 1.5
                     font.family: Config.moduleFontFamily
                 }
 
@@ -87,7 +116,7 @@ PanelWindow {
                         Rectangle {
                             width: parent.width
                             height: 60
-                            color: AudioData.defaultSink === modelData.name ? Theme.surface1 : Theme.surface0
+                            color: Theme.surface0
                             radius: Config.moduleRadius
 
                             Column {
@@ -149,7 +178,7 @@ PanelWindow {
                                         width: parent.availableWidth
                                         height: implicitHeight
                                         radius: 2
-                                        color: Theme.surface2
+                                         color: Theme.surface0
 
                                         Rectangle {
                                             width: parent.parent.visualPosition * parent.width
@@ -199,10 +228,11 @@ PanelWindow {
                 spacing: 15
 
                 Text {
-                    text: "Input Devices"
-                    color: Theme.text
-                    font.pixelSize: 16
+                    text: "INPUT"
+                    color: Theme.overlay0
+                    font.pixelSize: 10
                     font.bold: true
+                    font.letterSpacing: 1.5
                     font.family: Config.moduleFontFamily
                 }
 
@@ -216,7 +246,7 @@ PanelWindow {
                         Rectangle {
                             width: parent.width
                             height: 60
-                            color: AudioData.defaultSource === modelData.name ? Theme.surface1 : Theme.surface0
+                            color: Theme.surface0
                             radius: Config.moduleRadius
 
                             Column {
@@ -278,7 +308,7 @@ PanelWindow {
                                         width: parent.availableWidth
                                         height: implicitHeight
                                         radius: 2
-                                        color: Theme.surface2
+                                         color: Theme.surface0
 
                                         Rectangle {
                                             width: parent.parent.visualPosition * parent.width

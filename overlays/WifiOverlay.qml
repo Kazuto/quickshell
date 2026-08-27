@@ -91,7 +91,7 @@ PanelWindow {
         }
         width: 350
         height: Math.min(contentColumn.implicitHeight + 40, wifiOverlay.height - Config.barHeight - 50)
-        color: Config.alpha(Theme.base, 0.95)
+        color: Theme.mantle
         radius: Config.overlayRadius
         border.color: Theme.surface0
         border.width: 1

@@ -43,7 +43,7 @@ PanelWindow {
         }
         width: 400
         height: Math.min(700, parent.height - Config.barHeight - Config.barMarginTop - 40)
-        color: Config.alpha(Theme.base, 0.95)
+        color: Theme.mantle
         radius: Config.overlayRadius
         border.color: Theme.surface0
         border.width: 1

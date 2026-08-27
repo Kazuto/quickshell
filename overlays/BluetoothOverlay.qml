@@ -37,7 +37,7 @@ PanelWindow {
         }
         width: 350
         height: contentColumn.implicitHeight + 40
-        color: Config.alpha(Theme.base, 0.95)
+        color: Theme.mantle
         radius: Config.overlayRadius
         border.color: Theme.surface0
         border.width: 1
