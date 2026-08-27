@@ -21,14 +21,14 @@ Rectangle {
         SvgIcon {
             name: "calendar"
             size: Config.moduleFontSize
-            color: Theme.blue
+            color: Theme.subtext0
             anchors.verticalCenter: parent.verticalCenter
         }
 
         Text {
             id: clockText
             text: Qt.formatDateTime(new Date(), Config.clockFormat).trim()
-            color: Theme.blue
+            color: Theme.subtext0
             font.pixelSize: Config.moduleFontSize
             font.family: Config.moduleFontFamily
             anchors.verticalCenter: parent.verticalCenter

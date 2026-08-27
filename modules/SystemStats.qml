@@ -13,7 +13,7 @@ Rectangle {
         anchors.centerIn: parent
         name: "system-stats"
         size: Config.moduleFontSize
-        color: Theme.sky
+        color: Theme.subtext0
     }
 
     MouseArea {

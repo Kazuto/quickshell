@@ -15,7 +15,7 @@ Rectangle {
         anchors.centerIn: parent
         name: WifiData.enabled ? "wifi" : "wifi-off"
         size: Config.moduleFontSize
-        color: WifiData.enabled ? Theme.blue : Theme.overlay0
+        color: WifiData.enabled ? Theme.subtext0 : Theme.overlay0
     }
 
     MouseArea {

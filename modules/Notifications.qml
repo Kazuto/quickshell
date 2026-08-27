@@ -17,13 +17,13 @@ Rectangle {
         SvgIcon {
             name: NotificationData.paused ? "bell-slash" : "bell"
             size: Config.moduleFontSize
-            color: NotificationData.paused ? Theme.overlay0 : (NotificationData.count > 0 ? Theme.yellow : Theme.overlay0)
+            color: NotificationData.paused ? Theme.overlay0 : (NotificationData.count > 0 ? Theme.yellow : Theme.subtext0)
             anchors.verticalCenter: parent.verticalCenter
         }
 
         Text {
             text: NotificationData.count
-            color: NotificationData.paused ? Theme.overlay0 : (NotificationData.count > 0 ? Theme.yellow : Theme.overlay0)
+            color: NotificationData.paused ? Theme.overlay0 : (NotificationData.count > 0 ? Theme.yellow : Theme.subtext0)
             font.pixelSize: Config.moduleFontSize
             font.family: Config.moduleFontFamily
             anchors.verticalCenter: parent.verticalCenter

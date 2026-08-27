@@ -137,6 +137,12 @@ Rectangle {
         visible: AppState.vpnOverlayVisible
     }
 
+    // Logitech overlay
+    Overlays.LogitechOverlay {
+        id: logitechOverlay
+        visible: AppState.logitechOverlayVisible
+    }
+
     // Notifications overlay
     Overlays.NotificationsOverlay {
         id: notificationsOverlay

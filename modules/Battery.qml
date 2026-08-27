@@ -23,7 +23,7 @@ Rectangle {
         if (capacity <= 10) return Theme.red
         if (capacity <= 25) return Theme.peach
         if (capacity <= 50) return Theme.yellow
-        return Theme.text
+        return Theme.subtext0
     }
 
     property string iconName: {

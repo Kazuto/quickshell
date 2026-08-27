@@ -21,13 +21,13 @@ Rectangle {
         SvgIcon {
             name: "github"
             size: Config.moduleFontSize
-            color: GitHubData.notificationCount > 0 ? Theme.red : Theme.text
+            color: GitHubData.notificationCount > 0 ? Theme.red : Theme.subtext0
             anchors.verticalCenter: parent.verticalCenter
         }
 
         Text {
             text: GitHubData.notificationCount
-            color: GitHubData.notificationCount > 0 ? Theme.red : Theme.text
+            color: GitHubData.notificationCount > 0 ? Theme.red : Theme.subtext0
             font.pixelSize: Config.moduleFontSize
             font.family: Config.moduleFontFamily
             anchors.verticalCenter: parent.verticalCenter

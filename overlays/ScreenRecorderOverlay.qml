@@ -168,7 +168,7 @@ PanelWindow {
                 }
 
             Text {
-                text: selectingWindow ? " Select Window" : (selectingMonitor ? " Select Monitor" : " Screen Recorder")
+                text: selectingWindow ? "Select Window" : (selectingMonitor ? "Select Monitor" : "Screen Recorder")
                 color: Theme.text
                 font.pixelSize: 18
                 font.bold: true
@@ -202,7 +202,7 @@ PanelWindow {
                         width: parent.width
                         height: 50
                         text: modelData.name + " (" + modelData.width + "x" + modelData.height + ")"
-                        icon: "󰍹"
+                        icon: "monitor"
                         onClicked: startRecordingOnMonitor(modelData.name)
                     }
                 }
@@ -238,7 +238,6 @@ PanelWindow {
                             GhostButton {
                                 width: parent.width
                                 height: 60
-                                icon: ""
                                 onClicked: {
                                     console.log("Selected window:", modelData.geometry)
                                     selectingWindow = false
@@ -296,12 +295,11 @@ PanelWindow {
                     anchors.centerIn: parent
                     spacing: 10
 
-                    Text {
+                    SvgIcon {
                         anchors.verticalCenter: parent.verticalCenter
-                        text: AppState.isRecording ? "" : ""
+                        name: AppState.isRecording ? "record" : "record"
+                        size: 24
                         color: AppState.isRecording ? Theme.red : Theme.subtext0
-                        font.pixelSize: 24
-                        font.family: Config.moduleFontFamily
 
                         SequentialAnimation on opacity {
                             running: AppState.isRecording
@@ -340,7 +338,7 @@ PanelWindow {
                     GhostButton {
                         width: (parent.width - 20) / 3
                         text: "Screen"
-                        icon: "󰍹"
+                        icon: "monitor"
                         highlighted: recordMode === "screen"
                         enabled: !AppState.isRecording
                         onClicked: recordMode = "screen"
@@ -349,7 +347,7 @@ PanelWindow {
                     GhostButton {
                         width: (parent.width - 20) / 3
                         text: "Window"
-                        icon: ""
+                        icon: "monitor"
                         highlighted: recordMode === "window"
                         enabled: !AppState.isRecording
                         onClicked: recordMode = "window"
@@ -358,7 +356,7 @@ PanelWindow {
                     GhostButton {
                         width: (parent.width - 20) / 3
                         text: "Area"
-                        icon: ""
+                        icon: "monitor"
                         highlighted: recordMode === "area"
                         enabled: !AppState.isRecording
                         onClicked: recordMode = "area"
@@ -385,7 +383,7 @@ PanelWindow {
                     GhostButton {
                         width: (parent.width - 20) / 2
                         text: "System + Mic"
-                        icon: "󰕾"
+                        icon: "volume"
                         highlighted: audioMode === "both"
                         enabled: !AppState.isRecording
                         onClicked: audioMode = "both"
@@ -394,7 +392,7 @@ PanelWindow {
                     GhostButton {
                         width: (parent.width - 20) / 2
                         text: "System Only"
-                        icon: "󰓃"
+                        icon: "volume"
                         highlighted: audioMode === "system"
                         enabled: !AppState.isRecording
                         onClicked: audioMode = "system"
@@ -408,7 +406,7 @@ PanelWindow {
                     GhostButton {
                         width: (parent.width - 20) / 2
                         text: "Mic Only"
-                        icon: "󰍬"
+                        icon: "microphone"
                         highlighted: audioMode === "mic"
                         enabled: !AppState.isRecording
                         onClicked: audioMode = "mic"
@@ -417,7 +415,7 @@ PanelWindow {
                     GhostButton {
                         width: (parent.width - 20) / 2
                         text: "No Audio"
-                        icon: "󰝟"
+                        icon: "volume-muted"
                         highlighted: audioMode === "none"
                         enabled: !AppState.isRecording
                         onClicked: audioMode = "none"
@@ -482,7 +480,7 @@ PanelWindow {
                     width: (parent.width - 10) / 2
                     height: 50
                     text: AppState.isRecording ? "Stop" : "Start Recording"
-                    icon: AppState.isRecording ? "" : ""
+                    icon: AppState.isRecording ? "pause" : "record"
                     iconColor: AppState.isRecording ? Theme.red : Theme.green
                     onClicked: {
                         if (AppState.isRecording) {
@@ -497,7 +495,7 @@ PanelWindow {
                     width: (parent.width - 10) / 2
                     height: 50
                     text: "Open Folder"
-                    icon: "󰉋"
+                    icon: "storage"
                     enabled: !AppState.isRecording
                     onClicked: {
                         openFolderProcess.command = ["xdg-open", videosPath]
@@ -548,8 +546,13 @@ PanelWindow {
         // Always specify output explicitly - no TTY available for interactive picker
         cmd.push("-o", outputName)
 
-        if (audioMode === "both" || audioMode === "system" || audioMode === "mic") {
-            cmd.push("-a")
+        if (audioMode !== "none") {
+            if (audioMode === "mic") {
+                cmd.push("-aalsa_input.usb-Yamaha_Corporation_Steinberg_UR22C-00.Direct__Direct__source")
+            } else {
+                // system or both: use monitor source for system audio
+                cmd.push("-aalsa_output.usb-Yamaha_Corporation_Steinberg_UR22C-00.Direct__Direct__sink.monitor")
+            }
         }
 
         cmd.push("-c", "libx264")
@@ -579,8 +582,13 @@ PanelWindow {
         cmd.push("-g", geometry)
 
         // Audio
-        if (audioMode === "both" || audioMode === "system" || audioMode === "mic") {
-            cmd.push("-a")
+        if (audioMode !== "none") {
+            if (audioMode === "mic") {
+                cmd.push("-aalsa_input.usb-Yamaha_Corporation_Steinberg_UR22C-00.Direct__Direct__source")
+            } else {
+                // system or both: use monitor source for system audio
+                cmd.push("-aalsa_output.usb-Yamaha_Corporation_Steinberg_UR22C-00.Direct__Direct__sink.monitor")
+            }
         }
 
         // Codec

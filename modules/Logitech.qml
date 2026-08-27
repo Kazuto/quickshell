@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell.Io
 import "root:/"
+import "root:/singletons"
 import "root:/components"
 
 Rectangle {
@@ -22,7 +23,7 @@ Rectangle {
         anchors.centerIn: parent
         name: "mouse"
         size: Config.moduleFontSize
-        color: root.batteryLow ? Theme.red : Theme.overlay2
+        color: root.batteryLow ? Theme.red : Theme.subtext0
     }
 
     Process {
@@ -70,5 +71,6 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
+        onClicked: { AppState.lastClickX = mapToItem(null, width / 2, 0).x; AppState.toggleLogitechOverlay() }
     }
 }

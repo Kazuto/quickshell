@@ -13,7 +13,7 @@ Rectangle {
         anchors.centerIn: parent
         name: "bluetooth"
         size: Config.moduleFontSize
-        color: BluetoothData.powered ? Theme.sky : Theme.overlay0
+        color: BluetoothData.powered ? Theme.subtext0 : Theme.overlay0
     }
 
     MouseArea {

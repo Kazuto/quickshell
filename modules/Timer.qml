@@ -21,13 +21,13 @@ Rectangle {
         SvgIcon {
             name: "timer"
             size: Config.moduleFontSize
-            color: TimerData.remainingSeconds < 0 ? Theme.red : (TimerData.running ? Theme.yellow : Theme.text)
+            color: TimerData.remainingSeconds < 0 ? Theme.red : (TimerData.running ? Theme.yellow : Theme.subtext0)
             anchors.verticalCenter: parent.verticalCenter
         }
 
         Text {
             text: TimerData.displayTime
-            color: TimerData.remainingSeconds < 0 ? Theme.red : (TimerData.running ? Theme.yellow : Theme.text)
+            color: TimerData.remainingSeconds < 0 ? Theme.red : (TimerData.running ? Theme.yellow : Theme.subtext0)
             font.pixelSize: Config.moduleFontSize
             font.family: Config.moduleFontFamily
             anchors.verticalCenter: parent.verticalCenter

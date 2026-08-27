@@ -16,7 +16,7 @@ Rectangle {
         anchors.centerIn: parent
         name: "record"
         size: Config.moduleFontSize
-        color: AppState.isRecording ? Theme.red : Theme.overlay0
+        color: AppState.isRecording ? Theme.red : Theme.overlay1
     }
 
     MouseArea {

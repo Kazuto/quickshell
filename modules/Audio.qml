@@ -19,13 +19,13 @@ Rectangle {
         SvgIcon {
             name: AudioData.outputMuted ? "volume-muted" : "volume"
             size: Config.moduleFontSize
-            color: AudioData.outputMuted ? Theme.overlay0 : Theme.mauve
+            color: AudioData.outputMuted ? Theme.overlay0 : Theme.subtext0
             anchors.verticalCenter: parent.verticalCenter
         }
 
         Text {
             text: AudioData.outputMuted ? "Muted" : AudioData.outputVolume + "%"
-            color: AudioData.outputMuted ? Theme.overlay0 : Theme.mauve
+            color: AudioData.outputMuted ? Theme.overlay0 : Theme.subtext0
             font.pixelSize: Config.moduleFontSize
             font.family: Config.moduleFontFamily
             anchors.verticalCenter: parent.verticalCenter

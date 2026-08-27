@@ -14,7 +14,7 @@ Rectangle {
     Text {
         anchors.centerIn: parent
         text: Icon.ubuntu
-        color: Theme.blue
+        color: Theme.subtext0
         font.pixelSize: Config.moduleFontSize
         font.family: Config.moduleFontFamily
     }

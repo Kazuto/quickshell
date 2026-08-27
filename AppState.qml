@@ -14,6 +14,7 @@ Singleton {
     property bool audioOverlayVisible: false
     property bool wifiOverlayVisible: false
     property bool vpnOverlayVisible: false
+    property bool logitechOverlayVisible: false
     property bool notificationsOverlayVisible: false
     property bool systemStatsOverlayVisible: false
     property bool githubOverlayVisible: false
@@ -32,6 +33,7 @@ Singleton {
         audioOverlayVisible = false
         wifiOverlayVisible = false
         vpnOverlayVisible = false
+        logitechOverlayVisible = false
         notificationsOverlayVisible = false
         systemStatsOverlayVisible = false
         githubOverlayVisible = false
@@ -73,6 +75,11 @@ Singleton {
     function toggleVpnOverlay() {
         if (!vpnOverlayVisible) closeAllOverlays()
         vpnOverlayVisible = !vpnOverlayVisible
+    }
+
+    function toggleLogitechOverlay() {
+        if (!logitechOverlayVisible) closeAllOverlays()
+        logitechOverlayVisible = !logitechOverlayVisible
     }
 
     function toggleNotificationsOverlay() {
