@@ -40,7 +40,7 @@ PanelWindow {
             top: parent.top
             right: parent.right
             topMargin: 12
-            rightMargin: 50  // Position overlay near Audio module
+            rightMargin: Math.min(AppState.screenWidth - 400 - 10, Math.max(10, AppState.screenWidth - AppState.lastClickX - 400 / 2))  // Position overlay near Audio module
         }
         width: 400
         height: contentColumn.implicitHeight + 40

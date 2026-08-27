@@ -39,6 +39,6 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: AppState.toggleTimerOverlay()
+        onClicked: { AppState.lastClickX = mapToItem(null, width / 2, 0).x; AppState.toggleTimerOverlay() }
     }
 }

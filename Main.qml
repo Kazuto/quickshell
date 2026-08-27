@@ -12,6 +12,15 @@ Rectangle {
     anchors.fill: parent
     color: "transparent"
 
+    Component.onCompleted: {
+        // Use the bar's screen width for overlay positioning
+        var barScreen = Quickshell.screens.find(s => s.name === "HDMI-A-1")
+            || Quickshell.screens.find(s => s.primary)
+            || Quickshell.screens[0]
+        if (barScreen) AppState.screenWidth = barScreen.width
+        console.log("QuickShell started with IPC on:", ipcSocket.path)
+    }
+
     // Bar (Primary Display)
     Windows.Bar {
         id: bar
@@ -226,9 +235,5 @@ Rectangle {
                 }
             }
         }
-    }
-
-    Component.onCompleted: {
-        console.log("QuickShell started with IPC on:", ipcSocket.path)
     }
 }

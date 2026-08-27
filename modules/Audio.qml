@@ -39,6 +39,7 @@ Rectangle {
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: (mouse) => {
+            AppState.lastClickX = mapToItem(null, width / 2, 0).x
             if (mouse.button === Qt.RightButton) AudioData.toggleOutputMute()
             else AppState.toggleAudioOverlay()
         }

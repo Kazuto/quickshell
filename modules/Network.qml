@@ -78,6 +78,6 @@ Rectangle {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         enabled: !root.vpnBusy
-        onClicked: AppState.toggleVpnOverlay()
+        onClicked: { AppState.lastClickX = mapToItem(null, width / 2, 0).x; AppState.toggleVpnOverlay() }
     }
 }

@@ -39,7 +39,7 @@ PanelWindow {
             top: parent.top
             right: parent.right
             topMargin: 12
-            rightMargin: 20  // Position overlay near Notifications module (rightmost)
+            rightMargin: Math.min(AppState.screenWidth - 400 - 10, Math.max(10, AppState.screenWidth - AppState.lastClickX - 400 / 2))  // Position overlay near Notifications module (rightmost)
         }
         width: 400
         height: Math.min(700, parent.height - Config.barHeight - Config.barMarginTop - 40)

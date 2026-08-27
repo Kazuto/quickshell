@@ -33,7 +33,7 @@ PanelWindow {
             top: parent.top
             right: parent.right
             topMargin: 12
-            rightMargin: 155  // Position overlay near Bluetooth module
+            rightMargin: Math.min(AppState.screenWidth - 350 - 10, Math.max(10, AppState.screenWidth - AppState.lastClickX - 350 / 2))  // Position overlay near Bluetooth module
         }
         width: 350
         height: contentColumn.implicitHeight + 40

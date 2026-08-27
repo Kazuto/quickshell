@@ -33,7 +33,7 @@ PanelWindow {
             top: parent.top
             right: parent.right
             topMargin: 12
-            rightMargin: 20
+            rightMargin: Math.min(AppState.screenWidth - 350 - 10, Math.max(10, AppState.screenWidth - AppState.lastClickX - 350 / 2))
         }
         width: 350
         height: 480

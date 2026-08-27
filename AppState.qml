@@ -4,6 +4,11 @@ import QtQuick
 import Quickshell
 
 Singleton {
+    // Last clicked module's center X position (screen coords)
+    property int lastClickX: 0
+    // Primary screen width — set by Main.qml on startup
+    property int screenWidth: 1920
+
     property bool spotifyOverlayVisible: false
     property bool bluetoothOverlayVisible: false
     property bool audioOverlayVisible: false

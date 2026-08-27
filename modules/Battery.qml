@@ -92,6 +92,6 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: AppState.toggleBatteryOverlay()
+        onClicked: { AppState.lastClickX = mapToItem(null, width / 2, 0).x; AppState.toggleBatteryOverlay() }
     }
 }

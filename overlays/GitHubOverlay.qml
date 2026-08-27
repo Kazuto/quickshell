@@ -40,7 +40,7 @@ PanelWindow {
             top: parent.top
             right: parent.right
             topMargin: 12
-            rightMargin: 20
+            rightMargin: Math.min(AppState.screenWidth - 450 - 10, Math.max(10, AppState.screenWidth - AppState.lastClickX - 450 / 2))
         }
         width: 450
         height: Math.min(700, parent.height - Config.barHeight - Config.barMarginTop - 40)
