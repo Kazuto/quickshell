@@ -158,6 +158,12 @@ Rectangle {
         visible: AppState.powerOverlayVisible
     }
 
+    // Battery overlay
+    Overlays.BatteryOverlay {
+        id: batteryOverlay
+        visible: AppState.batteryOverlayVisible
+    }
+
     // IPC Socket Server
     SocketServer {
         id: ipcSocket

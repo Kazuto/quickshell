@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell.Io
 import "root:/"
 import "root:/components"
+import "root:/singletons"
 
 Rectangle {
     id: root
@@ -87,4 +88,10 @@ Rectangle {
     }
 
     Component.onCompleted: root.refresh()
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: AppState.toggleBatteryOverlay()
+    }
 }
