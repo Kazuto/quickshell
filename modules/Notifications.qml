@@ -14,20 +14,22 @@ Rectangle {
         anchors.centerIn: parent
         spacing: 6
 
+        property int unreadCount: NotificationData.notifications.filter(n => !NotificationData.isRead(n)).length
+
         SvgIcon {
             name: NotificationData.paused ? "bell-slash" : "bell"
             size: Config.moduleFontSize
-            color: NotificationData.paused ? Theme.overlay0 : (NotificationData.count > 0 ? Theme.yellow : Theme.subtext0)
+            color: NotificationData.paused ? Theme.overlay0 : (notifRow.unreadCount > 0 ? Theme.yellow : Theme.subtext0)
             anchors.verticalCenter: parent.verticalCenter
         }
 
         Text {
-            text: NotificationData.count
-            color: NotificationData.paused ? Theme.overlay0 : (NotificationData.count > 0 ? Theme.yellow : Theme.subtext0)
+            text: notifRow.unreadCount
+            color: NotificationData.paused ? Theme.overlay0 : (notifRow.unreadCount > 0 ? Theme.yellow : Theme.subtext0)
             font.pixelSize: Config.moduleFontSize
             font.family: Config.moduleFontFamily
             anchors.verticalCenter: parent.verticalCenter
-            visible: NotificationData.count > 0
+            visible: notifRow.unreadCount > 0
         }
     }
 

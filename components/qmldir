@@ -6,3 +6,4 @@ PowerButton 1.0 PowerButton.qml
 Toggle 1.0 Toggle.qml
 ModuleGroup 1.0 ModuleGroup.qml
 ModuleDivider 1.0 ModuleDivider.qml
+NotificationToast 1.0 NotificationToast.qml

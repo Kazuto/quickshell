@@ -1,118 +1,109 @@
 pragma Singleton
 import QtQuick
 import Quickshell
-import Quickshell.Io
+import Quickshell.Services.Notifications
 
 Singleton {
-    property int count: 0
+    property alias server: notifServer
     property bool paused: false
-    property var notifications: []
 
-    function refresh() {
-        historyProcess.running = false
-        historyProcess.running = true
-        countProcess.running = false
-        countProcess.running = true
-        pausedProcess.running = false
-        pausedProcess.running = true
+    property var notifications: []
+    property var readIds: ({})
+    property var liveRefs: ({})
+
+    readonly property int maxPopups: 5
+
+    property alias popups: popupModel
+    ListModel { id: popupModel }
+
+    function isRead(notification) {
+        return !!readIds[notification.id]
     }
 
-    function closeNotification(id) {
-        commandProcess.command = ["dunstctl", "history-rm", id.toString()]
-        commandProcess.running = true
+    function notifAt(index) {
+        if (index < 0 || index >= popupModel.count) return null
+        return liveRefs[popupModel.get(index).nid] || null
+    }
+
+    function indexOfId(id) {
+        for (var i = 0; i < popupModel.count; i++)
+            if (popupModel.get(i).nid === id) return i
+        return -1
+    }
+
+    function markRead(notification) {
+        if (!notification) return
+        var updated = Object.assign({}, readIds)
+        updated[notification.id] = true
+        readIds = updated
+        var idx = indexOfId(notification.id)
+        if (idx >= 0) popupModel.remove(idx)
+        delete liveRefs[notification.id]
+    }
+
+    function dismissNotification(notification) {
+        if (!notification) return
+        var idx = indexOfId(notification.id)
+        if (idx >= 0) popupModel.remove(idx)
+        delete liveRefs[notification.id]
+        notification.tracked = false
+        notifications = notifServer.trackedNotifications.values.slice().reverse()
+    }
+
+    function removePopup(notification) {
+        if (!notification) return
+        var idx = indexOfId(notification.id)
+        if (idx >= 0) popupModel.remove(idx)
+        delete liveRefs[notification.id]
     }
 
     function clearAll() {
-        commandProcess.command = ["dunstctl", "history-clear"]
-        commandProcess.running = true
+        for (var i = notifServer.trackedNotifications.values.length - 1; i >= 0; i--)
+            notifServer.trackedNotifications.values[i].tracked = false
+        notifications = []
+        popupModel.clear()
+        liveRefs = {}
+        readIds = {}
     }
 
-    function togglePause() {
-        commandProcess.command = ["dunstctl", "set-paused", "toggle"]
-        commandProcess.running = true
-    }
+    function togglePause() { paused = !paused }
 
-    Process {
-        id: commandProcess
-        running: false
-        onExited: refreshTimer.start()
-    }
+    NotificationServer {
+        id: notifServer
+        bodySupported: true
+        bodyMarkupSupported: true
+        actionsSupported: true
+        imageSupported: true
+        keepOnReload: true
 
-    Timer {
-        id: refreshTimer
-        interval: 300
-        running: false
-        repeat: false
-        onTriggered: refresh()
-    }
+        onNotification: notif => {
+            if (!notif.transient) notif.tracked = true
 
-    // Get notification count
-    Process {
-        id: countProcess
-        running: true
-        command: ["dunstctl", "count", "history"]
-
-        stdout: SplitParser {
-            onRead: data => {
-                count = parseInt(data) || 0
-            }
-        }
-    }
-
-    // Get pause status
-    Process {
-        id: pausedProcess
-        running: true
-        command: ["dunstctl", "is-paused"]
-
-        stdout: SplitParser {
-            onRead: data => {
-                paused = data.trim() === "true"
-            }
-        }
-    }
-
-    // Get notification history
-    Process {
-        id: historyProcess
-        running: true
-        command: ["sh", "-c", "dunstctl history | jq -r '.data[] | .[] | \"\\(.id.data)|||\\(.summary.data)|||\\(.body.data)|||\\(.appname.data)|||\\(.timestamp.data)\"'"]
-
-        stdout: SplitParser {
-            onRead: data => {
-                var parts = data.split("|||")
-                if (parts.length === 5) {
-                    notifications = notifications.concat([{
-                        id: parseInt(parts[0]),
-                        summary: parts[1],
-                        body: parts[2],
-                        appname: parts[3],
-                        timestamp: parseInt(parts[4])
-                    }])
+            if (!paused && !notif.lastGeneration) {
+                // Remove duplicate id if present
+                var dup = indexOfId(notif.id)
+                if (dup >= 0) {
+                    delete liveRefs[notif.id]
+                    popupModel.remove(dup)
                 }
+                // Trim oldest if at cap
+                if (popupModel.count >= maxPopups) {
+                    var oldId = popupModel.get(popupModel.count - 1).nid
+                    delete liveRefs[oldId]
+                    popupModel.remove(popupModel.count - 1)
+                }
+                liveRefs[notif.id] = notif
+                popupModel.insert(0, { nid: notif.id })
             }
-        }
 
-        onRunningChanged: {
-            if (running) {
-                notifications = []
-            }
+            notifications = notifServer.trackedNotifications.values.slice().reverse()
         }
     }
 
-    Timer {
-        interval: 5000
-        running: true
-        repeat: true
-        onTriggered: {
-            countProcess.running = false
-            countProcess.running = true
-            pausedProcess.running = false
-            pausedProcess.running = true
+    Connections {
+        target: notifServer.trackedNotifications
+        function onValuesChanged() {
+            notifications = notifServer.trackedNotifications.values.slice().reverse()
         }
-    }
-
-    Component.onCompleted: {
-        refresh()
     }
 }

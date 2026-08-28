@@ -143,10 +143,15 @@ Rectangle {
         visible: AppState.logitechOverlayVisible
     }
 
-    // Notifications overlay
+    // Notifications overlay (history panel)
     Overlays.NotificationsOverlay {
         id: notificationsOverlay
         visible: AppState.notificationsOverlayVisible
+    }
+
+    // Notification toast popups (always active, manages its own visibility)
+    Overlays.NotificationPopupsOverlay {
+        id: notificationPopupsOverlay
     }
 
     // Control Center overlay removed — replaced by separate Wifi/Audio/Bluetooth overlays

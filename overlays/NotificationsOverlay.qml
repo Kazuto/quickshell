@@ -21,12 +21,6 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
-    onVisibleChanged: {
-        if (visible) {
-            NotificationData.refresh()
-        }
-    }
-
     // Click outside to close
     MouseArea {
         anchors.fill: parent
@@ -39,7 +33,7 @@ PanelWindow {
             top: parent.top
             right: parent.right
             topMargin: 12
-            rightMargin: Math.min(AppState.screenWidth - 400 - 10, Math.max(10, AppState.screenWidth - AppState.lastClickX - 400 / 2))  // Position overlay near Notifications module (rightmost)
+            rightMargin: Math.min(AppState.screenWidth - 400 - 10, Math.max(10, AppState.screenWidth - AppState.lastClickX - 400 / 2))
         }
         width: 400
         height: Math.min(700, parent.height - Config.barHeight - Config.barMarginTop - 40)
@@ -164,6 +158,7 @@ PanelWindow {
                         height: notifContent.implicitHeight + 20
                         color: notifMouseArea.containsMouse ? Theme.surface1 : Theme.surface0
                         radius: Config.moduleRadius
+                        opacity: NotificationData.isRead(modelData) ? 0.5 : 1.0
 
                         Row {
                             id: notifContent
@@ -193,17 +188,18 @@ PanelWindow {
 
                                 Text {
                                     width: parent.width
-                                    text: modelData.body.replace(/<[^>]*>/g, '')  // Strip HTML tags
+                                    text: modelData.body.replace(/<[^>]*>/g, '')
                                     color: Theme.subtext0
                                     font.pixelSize: 12
                                     font.family: Config.moduleFontFamily
                                     elide: Text.ElideRight
                                     wrapMode: Text.Wrap
                                     maximumLineCount: 3
+                                    visible: text !== ""
                                 }
 
                                 Text {
-                                    text: modelData.appname
+                                    text: modelData.appName
                                     color: Theme.overlay0
                                     font.pixelSize: 10
                                     font.family: Config.moduleFontFamily
@@ -223,7 +219,7 @@ PanelWindow {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        NotificationData.closeNotification(modelData.id)
+                                        NotificationData.dismissNotification(modelData)
                                         mouse.accepted = true
                                     }
                                 }
@@ -235,6 +231,7 @@ PanelWindow {
                             anchors.fill: parent
                             hoverEnabled: true
                             z: -1
+                            onClicked: NotificationData.markRead(modelData)
                         }
                     }
                 }
