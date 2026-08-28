@@ -78,7 +78,7 @@ Rectangle {
     // Bar (Secondary Display - Workspaces Only)
     Windows.Bar {
         id: barSecondary
-        screen:screenByName("DVI-I-2") 
+        screen:screenByName("DP-10") 
 
         leftItems: [
             Modules.Workspaces {
@@ -94,7 +94,7 @@ Rectangle {
     // Bar (Third Display - Left Side - Workspaces Only)
     Windows.Bar {
         id: barTertiary
-        screen: screenByName("DVI-I-1")
+        screen: screenByName("DP-12")
 
         leftItems: [
             Modules.Workspaces {
