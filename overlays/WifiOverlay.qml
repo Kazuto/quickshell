@@ -20,7 +20,31 @@ PanelWindow {
     visible: true
 
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+
+    // ── password prompt state ────────────────────────────────────────────────
+    property string promptSsid: ""
+    property string promptPassword: ""
+    property bool promptShowPassword: false
+
+    function openPrompt(ssid) {
+        if (promptSsid === ssid) {
+            promptSsid = ""
+            promptPassword = ""
+        } else {
+            promptSsid = ssid
+            promptPassword = ""
+            promptShowPassword = false
+        }
+    }
+
+    function submitPassword() {
+        if (promptSsid === "" || promptPassword === "") return
+        WifiData.connectNetworkWithPassword(promptSsid, promptPassword)
+        promptSsid = ""
+        promptPassword = ""
+        AppState.toggleWifiOverlay()
+    }
 
     // ── connection details ───────────────────────────────────────────────────
     property string connIp:      "—"
@@ -295,74 +319,220 @@ PanelWindow {
                     Repeater {
                         model: WifiData.networks
 
-                        Rectangle {
+                        Column {
                             width: parent.width
-                            height: 50
-                            color: modelData.active
-                                ? Config.alpha(Theme.blue, 0.12)
-                                : (netMouse.containsMouse ? Theme.surface1 : Theme.surface0)
-                            radius: Config.moduleRadius
-                            border.color: modelData.active ? Theme.blue : "transparent"
-                            border.width: 1
+                            spacing: 0
 
-                            Behavior on color { ColorAnimation { duration: 120 } }
+                            // ── Network row ───────────────────────────────
+                            Rectangle {
+                                width: parent.width
+                                height: 50
+                                color: modelData.active
+                                    ? Config.alpha(Theme.blue, 0.12)
+                                    : (netMouse.containsMouse ? Theme.surface1 : Theme.surface0)
+                                radius: Config.moduleRadius
+                                border.color: modelData.active
+                                    ? Theme.blue
+                                    : (wifiOverlay.promptSsid === modelData.ssid ? Theme.peach : "transparent")
+                                border.width: 1
 
-                            Row {
-                                anchors {
-                                    left: parent.left
-                                    right: parent.right
-                                    verticalCenter: parent.verticalCenter
-                                    margins: 14
-                                }
-                                spacing: 12
+                                Behavior on color { ColorAnimation { duration: 120 } }
 
-                                SvgIcon {
-                                    name: "wifi"
-                                    size: 18
-                                    color: modelData.active ? Theme.blue : Theme.overlay0
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
+                                Row {
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        verticalCenter: parent.verticalCenter
+                                        margins: 14
+                                    }
+                                    spacing: 12
 
-                                Column {
-                                    width: parent.width - 80
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: 2
+                                    SvgIcon {
+                                        name: "wifi"
+                                        size: 18
+                                        color: modelData.active ? Theme.blue : Theme.overlay0
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
 
-                                    Text {
-                                        text: modelData.ssid
-                                        color: modelData.active ? Theme.blue : Theme.text
-                                        font.pixelSize: 13
-                                        font.bold: modelData.active
-                                        font.family: Config.moduleFontFamily
-                                        elide: Text.ElideRight
-                                        width: parent.width
+                                    Column {
+                                        width: parent.width - 80
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        spacing: 2
+
+                                        Text {
+                                            text: modelData.ssid
+                                            color: modelData.active ? Theme.blue : Theme.text
+                                            font.pixelSize: 13
+                                            font.bold: modelData.active
+                                            font.family: Config.moduleFontFamily
+                                            elide: Text.ElideRight
+                                            width: parent.width
+                                        }
+
+                                        Text {
+                                            text: modelData.active ? "Connected" : (modelData.security !== "" ? modelData.security : "Open")
+                                            color: modelData.active ? Theme.blue : Theme.overlay0
+                                            font.pixelSize: 11
+                                            font.family: Config.moduleFontFamily
+                                        }
                                     }
 
                                     Text {
-                                        text: modelData.active ? "Connected" : (modelData.security !== "" ? modelData.security : "Open")
-                                        color: modelData.active ? Theme.blue : Theme.overlay0
+                                        text: modelData.signal + "%"
+                                        color: Theme.subtext0
                                         font.pixelSize: 11
                                         font.family: Config.moduleFontFamily
+                                        anchors.verticalCenter: parent.verticalCenter
                                     }
                                 }
 
-                                Text {
-                                    text: modelData.signal + "%"
-                                    color: Theme.subtext0
-                                    font.pixelSize: 11
-                                    font.family: Config.moduleFontFamily
-                                    anchors.verticalCenter: parent.verticalCenter
+                                MouseArea {
+                                    id: netMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (modelData.active) {
+                                            WifiData.disconnectNetwork()
+                                        } else if (modelData.security !== "" && WifiData.savedSsids.indexOf(modelData.ssid) < 0) {
+                                            wifiOverlay.openPrompt(modelData.ssid)
+                                        } else {
+                                            WifiData.connectNetwork(modelData.ssid)
+                                            AppState.toggleWifiOverlay()
+                                        }
+                                    }
                                 }
                             }
 
-                            MouseArea {
-                                id: netMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    if (modelData.active) WifiData.disconnectNetwork()
-                                    else WifiData.connectNetwork(modelData.ssid)
+                            // ── Password prompt (expands below secured networks) ──
+                            Rectangle {
+                                width: parent.width
+                                height: wifiOverlay.promptSsid === modelData.ssid ? promptCol.implicitHeight + 20 : 0
+                                visible: height > 0
+                                clip: true
+                                color: Config.alpha(Theme.peach, 0.06)
+                                radius: Config.moduleRadius
+                                border.color: Config.alpha(Theme.peach, 0.2)
+                                border.width: 1
+
+                                Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
+                                Column {
+                                    id: promptCol
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        top: parent.top
+                                        margins: 12
+                                    }
+                                    spacing: 8
+
+                                    Text {
+                                        text: "Password for \"" + modelData.ssid + "\""
+                                        color: Theme.subtext0
+                                        font.pixelSize: 11
+                                        font.family: Config.moduleFontFamily
+                                    }
+
+                                    // Password input row
+                                    Rectangle {
+                                        width: parent.width
+                                        height: 32
+                                        color: Theme.surface0
+                                        radius: 6
+                                        border.color: passwordField.activeFocus ? Theme.peach : Theme.surface1
+                                        border.width: 1
+
+                                        Behavior on border.color { ColorAnimation { duration: 120 } }
+
+                                        Row {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: 10
+                                            anchors.rightMargin: 4
+                                            spacing: 0
+
+                                            TextInput {
+                                                id: passwordField
+                                                width: parent.width - 30
+                                                height: parent.height
+                                                verticalAlignment: TextInput.AlignVCenter
+                                                color: Theme.text
+                                                font.pixelSize: 12
+                                                font.family: Config.moduleFontFamily
+                                                echoMode: wifiOverlay.promptShowPassword
+                                                    ? TextInput.Normal
+                                                    : TextInput.Password
+                                                text: wifiOverlay.promptSsid === modelData.ssid
+                                                    ? wifiOverlay.promptPassword : ""
+                                                onTextChanged: {
+                                                    if (wifiOverlay.promptSsid === modelData.ssid)
+                                                        wifiOverlay.promptPassword = text
+                                                }
+                                                onAccepted: wifiOverlay.submitPassword()
+                                                Keys.onEscapePressed: {
+                                                    wifiOverlay.promptSsid = ""
+                                                    wifiOverlay.promptPassword = ""
+                                                }
+                                            }
+
+                                            // Show/hide toggle
+                                            Rectangle {
+                                                width: 28
+                                                height: parent.height
+                                                color: "transparent"
+                                                anchors.verticalCenter: parent.verticalCenter
+
+                                                Text {
+                                                    anchors.centerIn: parent
+                                                    text: wifiOverlay.promptShowPassword ? "\uf06e" : "\uf070"
+                                                    color: Theme.overlay1
+                                                    font.pixelSize: 14
+                                                    font.family: Config.moduleFontFamily
+                                                }
+
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: wifiOverlay.promptShowPassword = !wifiOverlay.promptShowPassword
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Connect button
+                                    Rectangle {
+                                        width: parent.width
+                                        height: 30
+                                        radius: 6
+                                        color: connectBtnMouse.containsMouse
+                                            ? Theme.peach
+                                            : Config.alpha(Theme.peach, 0.8)
+                                        opacity: wifiOverlay.promptPassword.length > 0 ? 1 : 0.4
+
+                                        Behavior on color { ColorAnimation { duration: 120 } }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "Connect"
+                                            color: Theme.base
+                                            font.pixelSize: 12
+                                            font.bold: true
+                                            font.family: Config.moduleFontFamily
+                                        }
+
+                                        MouseArea {
+                                            id: connectBtnMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: wifiOverlay.submitPassword()
+                                        }
+                                    }
+                                }
+
+                                // Focus the password field when prompt opens
+                                onVisibleChanged: {
+                                    if (visible) Qt.callLater(function() { passwordField.forceActiveFocus() })
                                 }
                             }
                         }
