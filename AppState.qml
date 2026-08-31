@@ -25,6 +25,7 @@ Singleton {
     property bool screenRecorderOverlayVisible: false
     property bool powerOverlayVisible: false
     property bool batteryOverlayVisible: false
+    property bool launcherOverlayVisible: false
     property bool isRecording: false
 
     function closeAllOverlays() {
@@ -44,6 +45,7 @@ Singleton {
         screenRecorderOverlayVisible = false
         powerOverlayVisible = false
         batteryOverlayVisible = false
+        launcherOverlayVisible = false
     }
 
     function toggleSpotifyOverlay() {
@@ -150,5 +152,12 @@ Singleton {
             closeAllOverlays()
         }
         batteryOverlayVisible = !batteryOverlayVisible
+    }
+
+    function toggleLauncherOverlay() {
+        if (!launcherOverlayVisible) {
+            closeAllOverlays()
+        }
+        launcherOverlayVisible = !launcherOverlayVisible
     }
 }

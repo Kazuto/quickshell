@@ -210,6 +210,12 @@ Rectangle {
         visible: AppState.batteryOverlayVisible
     }
 
+    // App Launcher overlay
+    Overlays.LauncherOverlay {
+        id: launcherOverlay
+        visible: AppState.launcherOverlayVisible
+    }
+
     // IPC Socket Server
     SocketServer {
         id: ipcSocket
@@ -234,6 +240,8 @@ Rectangle {
                         AppState.spotifyOverlayVisible = true
                     } else if (msg === "spotify-hide") {
                         AppState.spotifyOverlayVisible = false
+                    } else if (msg === "launcher-toggle") {
+                        AppState.toggleLauncherOverlay()
                     } else {
                         console.log("Unknown command:", msg)
                     }
