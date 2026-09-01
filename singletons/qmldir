@@ -7,3 +7,4 @@ singleton TimerData 1.0 TimerData.qml
 singleton OllamaData 1.0 OllamaData.qml
 singleton SystemData 1.0 SystemData.qml
 singleton WifiData 1.0 WifiData.qml
+singleton OsdData 1.0 OsdData.qml

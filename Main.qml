@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Io
 
 import "root:/"
+import "./singletons"
 import "./modules" as Modules
 import "./windows" as Windows
 import "./overlays" as Overlays
@@ -216,6 +217,11 @@ Rectangle {
         visible: AppState.launcherOverlayVisible
     }
 
+    // OSD (volume / brightness)
+    Overlays.OsdOverlay {
+        id: osdOverlay
+    }
+
     // IPC Socket Server
     SocketServer {
         id: ipcSocket
@@ -242,6 +248,13 @@ Rectangle {
                         AppState.spotifyOverlayVisible = false
                     } else if (msg === "launcher-toggle") {
                         AppState.toggleLauncherOverlay()
+                    } else if (msg.startsWith("osd-volume:")) {
+                        // "osd-volume:<0-100>:<muted|unmuted>"
+                        var parts = msg.split(":")
+                        OsdData.showVolume(parseInt(parts[1]) || 0, parts[2] === "muted")
+                    } else if (msg.startsWith("osd-brightness:")) {
+                        // "osd-brightness:<0-100>"
+                        OsdData.showBrightness(parseInt(msg.split(":")[1]) || 0)
                     } else {
                         console.log("Unknown command:", msg)
                     }
