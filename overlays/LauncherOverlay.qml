@@ -69,7 +69,7 @@ PanelWindow {
         var cmd = entry.execString.replace(/%[fFuUcCkdki%]/g, "").trim()
         if (!cmd) return
         Qt.createQmlObject(
-            'import Quickshell.Io; Process { command: ["bash", "-c", ' + JSON.stringify(cmd) + ']; running: true }',
+            'import Quickshell.Io; Process { command: ["hyprctl", "dispatch", "exec", ' + JSON.stringify(cmd) + ']; running: true }',
             root
         )
         closeOverlay()
