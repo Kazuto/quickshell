@@ -217,6 +217,12 @@ Rectangle {
         visible: AppState.launcherOverlayVisible
     }
 
+    // Emoji Picker overlay
+    Overlays.EmojiPickerOverlay {
+        id: emojiPickerOverlay
+        visible: AppState.emojiPickerOverlayVisible
+    }
+
     // OSD (volume / brightness)
     Overlays.OsdOverlay {
         id: osdOverlay
@@ -248,6 +254,8 @@ Rectangle {
                         AppState.spotifyOverlayVisible = false
                     } else if (msg === "launcher-toggle") {
                         AppState.toggleLauncherOverlay()
+                    } else if (msg === "emoji-toggle") {
+                        AppState.toggleEmojiPickerOverlay()
                     } else if (msg.startsWith("osd-volume:")) {
                         // "osd-volume:<0-100>:<muted|unmuted>"
                         var parts = msg.split(":")
