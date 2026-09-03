@@ -75,9 +75,9 @@ Singleton {
 
         stdout: SplitParser {
             onRead: data => {
-                if (data.startsWith("RADIO:")) {
-                    enabled = data.substring(6).trim() === "enabled"
-                } else if (data.startsWith("CONNECTED:")) {
+                if (data.startsWith("RADIO:")) { enabled = data.substring(6).trim() === "enabled"; return }
+
+                if (data.startsWith("CONNECTED:")) {
                     var parts = data.substring(10).split(":")
                     connectedSsid = parts[0] || ""
                     connectedSignal = parseInt(parts[1]) || 0

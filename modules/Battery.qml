@@ -67,7 +67,11 @@ Rectangle {
                 if (!isNaN(val)) {
                     root.capacity = val
                     nextIsStatus = true
-                } else if (nextIsStatus) {
+
+                    return
+                }
+
+                if (nextIsStatus) {
                     root.status = line.trim()
                     nextIsStatus = false
                 }

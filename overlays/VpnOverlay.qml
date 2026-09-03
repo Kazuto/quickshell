@@ -71,13 +71,13 @@ PanelWindow {
         ]
         stdout: SplitParser {
             onRead: line => {
-                if      (line.startsWith("CONNECTED:")) vpnOverlay.connected  = line.substring(10).trim() === "yes"
-                else if (line.startsWith("IFACE:"))     vpnOverlay.iface      = line.substring(6).trim()
-                else if (line.startsWith("IP:"))        vpnOverlay.tunnelIp   = line.substring(3).trim()
-                else if (line.startsWith("SERVER:"))    vpnOverlay.server     = line.substring(7).trim()
-                else if (line.startsWith("PROTO:"))     vpnOverlay.protocol   = line.substring(6).trim()
-                else if (line.startsWith("RX:"))        vpnOverlay.rxBytes    = vpnOverlay.formatBytes(line.substring(3).trim())
-                else if (line.startsWith("TX:"))        vpnOverlay.txBytes    = vpnOverlay.formatBytes(line.substring(3).trim())
+                if (line.startsWith("CONNECTED:")) { vpnOverlay.connected = line.substring(10).trim() === "yes"; return }
+                if (line.startsWith("IFACE:"))     { vpnOverlay.iface     = line.substring(6).trim(); return }
+                if (line.startsWith("IP:"))        { vpnOverlay.tunnelIp  = line.substring(3).trim(); return }
+                if (line.startsWith("SERVER:"))    { vpnOverlay.server    = line.substring(7).trim(); return }
+                if (line.startsWith("PROTO:"))     { vpnOverlay.protocol  = line.substring(6).trim(); return }
+                if (line.startsWith("RX:"))        { vpnOverlay.rxBytes   = vpnOverlay.formatBytes(line.substring(3).trim()); return }
+                if (line.startsWith("TX:"))        { vpnOverlay.txBytes   = vpnOverlay.formatBytes(line.substring(3).trim()) }
             }
         }
     }

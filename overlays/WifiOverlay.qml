@@ -73,9 +73,9 @@ PanelWindow {
         ].join("; ")]
         stdout: SplitParser {
             onRead: line => {
-                if (line.startsWith("IP:"))  wifiOverlay.connIp      = line.substring(3).trim()
-                else if (line.startsWith("GW:"))  wifiOverlay.connGateway = line.substring(3).trim()
-                else if (line.startsWith("DNS:")) wifiOverlay.connDns     = line.substring(4).trim()
+                if (line.startsWith("IP:"))  { wifiOverlay.connIp      = line.substring(3).trim(); return }
+                if (line.startsWith("GW:"))  { wifiOverlay.connGateway = line.substring(3).trim(); return }
+                if (line.startsWith("DNS:")) { wifiOverlay.connDns     = line.substring(4).trim() }
             }
         }
     }
@@ -394,12 +394,18 @@ PanelWindow {
                                     onClicked: {
                                         if (modelData.active) {
                                             WifiData.disconnectNetwork()
-                                        } else if (modelData.security !== "" && WifiData.savedSsids.indexOf(modelData.ssid) < 0) {
-                                            wifiOverlay.openPrompt(modelData.ssid)
-                                        } else {
-                                            WifiData.connectNetwork(modelData.ssid)
-                                            AppState.toggleWifiOverlay()
+
+                                            return
                                         }
+
+                                        if (modelData.security !== "" && WifiData.savedSsids.indexOf(modelData.ssid) < 0) {
+                                            wifiOverlay.openPrompt(modelData.ssid)
+
+                                            return
+                                        }
+
+                                        WifiData.connectNetwork(modelData.ssid)
+                                        AppState.toggleWifiOverlay()
                                     }
                                 }
                             }

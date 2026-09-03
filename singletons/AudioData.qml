@@ -133,19 +133,12 @@ Singleton {
 
         stdout: SplitParser {
             onRead: data => {
-                if (data.startsWith("OUTPUT_VOL:")) {
-                    outputVolume = parseInt(data.substring(11)) || 0
-                } else if (data.startsWith("OUTPUT_MUTE:")) {
-                    outputMuted = data.substring(12) === "true"
-                } else if (data.startsWith("INPUT_VOL:")) {
-                    inputVolume = parseInt(data.substring(10)) || 0
-                } else if (data.startsWith("INPUT_MUTE:")) {
-                    inputMuted = data.substring(11) === "true"
-                } else if (data.startsWith("DEFAULT_SINK:")) {
-                    defaultSink = data.substring(13)
-                } else if (data.startsWith("DEFAULT_SOURCE:")) {
-                    defaultSource = data.substring(15)
-                }
+                if (data.startsWith("OUTPUT_VOL:"))     { outputVolume = parseInt(data.substring(11)) || 0; return }
+                if (data.startsWith("OUTPUT_MUTE:"))    { outputMuted = data.substring(12) === "true"; return }
+                if (data.startsWith("INPUT_VOL:"))      { inputVolume = parseInt(data.substring(10)) || 0; return }
+                if (data.startsWith("INPUT_MUTE:"))     { inputMuted = data.substring(11) === "true"; return }
+                if (data.startsWith("DEFAULT_SINK:"))   { defaultSink = data.substring(13); return }
+                if (data.startsWith("DEFAULT_SOURCE:")) { defaultSource = data.substring(15) }
             }
         }
     }
@@ -188,22 +181,26 @@ Singleton {
         stdout: SplitParser {
             onRead: data => {
                 var parts = data.split("|||")
-                if (parts.length === 5) {
-                    if (parts[0] === "SINK") {
-                        sinks = sinks.concat([{
-                            name: parts[1],
-                            description: parts[2],
-                            volume: parseInt(parts[3]) || 0,
-                            muted: parts[4] === "true"
-                        }])
-                    } else if (parts[0] === "SOURCE") {
-                        sources = sources.concat([{
-                            name: parts[1],
-                            description: parts[2],
-                            volume: parseInt(parts[3]) || 0,
-                            muted: parts[4] === "true"
-                        }])
-                    }
+                if (parts.length !== 5) return
+
+                if (parts[0] === "SINK") {
+                    sinks = sinks.concat([{
+                        name: parts[1],
+                        description: parts[2],
+                        volume: parseInt(parts[3]) || 0,
+                        muted: parts[4] === "true"
+                    }])
+
+                    return
+                }
+
+                if (parts[0] === "SOURCE") {
+                    sources = sources.concat([{
+                        name: parts[1],
+                        description: parts[2],
+                        volume: parseInt(parts[3]) || 0,
+                        muted: parts[4] === "true"
+                    }])
                 }
             }
         }

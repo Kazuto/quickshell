@@ -168,22 +168,23 @@ Singleton {
 
                 // Parse RX bits
                 if (trimmed.startsWith("RX:")) {
-                    var value = trimmed.substring(3)
-                    var num = parseFloat(value)
-                    if (!isNaN(num)) {
-                        networkBitsPerSecDown = num
-                        networkSpeedDown = formatSpeed(num)
-                        networkHistoryDown = addToHistory(networkHistoryDown, num / 1000000, 60)
+                    var rxNum = parseFloat(trimmed.substring(3))
+                    if (!isNaN(rxNum)) {
+                        networkBitsPerSecDown = rxNum
+                        networkSpeedDown = formatSpeed(rxNum)
+                        networkHistoryDown = addToHistory(networkHistoryDown, rxNum / 1000000, 60)
                     }
+
+                    return
                 }
+
                 // Parse TX bits
-                else if (trimmed.startsWith("TX:")) {
-                    var value = trimmed.substring(3)
-                    var num = parseFloat(value)
-                    if (!isNaN(num)) {
-                        networkBitsPerSecUp = num
-                        networkSpeedUp = formatSpeed(num)
-                        networkHistoryUp = addToHistory(networkHistoryUp, num / 1000000, 60)
+                if (trimmed.startsWith("TX:")) {
+                    var txNum = parseFloat(trimmed.substring(3))
+                    if (!isNaN(txNum)) {
+                        networkBitsPerSecUp = txNum
+                        networkSpeedUp = formatSpeed(txNum)
+                        networkHistoryUp = addToHistory(networkHistoryUp, txNum / 1000000, 60)
                     }
                 }
             }
@@ -221,15 +222,9 @@ Singleton {
             onRead: data => {
                 var trimmed = data.trim()
 
-                if (trimmed.startsWith("CPU:")) {
-                    cpuTemp = parseInt(trimmed.substring(4)) || 0
-                }
-                else if (trimmed.startsWith("GPU:")) {
-                    gpuTemp = parseInt(trimmed.substring(4)) || 0
-                }
-                else if (trimmed.startsWith("NVME:")) {
-                    nvmeTemp = parseInt(trimmed.substring(5)) || 0
-                }
+                if (trimmed.startsWith("CPU:"))  { cpuTemp  = parseInt(trimmed.substring(4)) || 0; return }
+                if (trimmed.startsWith("GPU:"))  { gpuTemp  = parseInt(trimmed.substring(4)) || 0; return }
+                if (trimmed.startsWith("NVME:")) { nvmeTemp = parseInt(trimmed.substring(5)) || 0 }
             }
         }
     }

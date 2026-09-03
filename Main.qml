@@ -241,31 +241,64 @@ Rectangle {
 
                     if (msg === "menu-toggle") {
                         AppState.toggleMenuOverlay()
-                    } else if (msg === "power-toggle") {
+
+                        return
+                    }
+
+                    if (msg === "power-toggle") {
                         AppState.togglePowerOverlay()
-                    } else if (msg === "spotify-toggle") {
+
+                        return
+                    }
+
+                    if (msg === "spotify-toggle") {
                         AppState.toggleSpotifyOverlay()
-                    } else if (msg === "spotify-show") {
+
+                        return
+                    }
+
+                    if (msg === "spotify-show") {
                         if (!AppState.spotifyOverlayVisible) {
                             AppState.closeAllOverlays()
                         }
                         AppState.spotifyOverlayVisible = true
-                    } else if (msg === "spotify-hide") {
+
+                        return
+                    }
+
+                    if (msg === "spotify-hide") {
                         AppState.spotifyOverlayVisible = false
-                    } else if (msg === "launcher-toggle") {
+
+                        return
+                    }
+
+                    if (msg === "launcher-toggle") {
                         AppState.toggleLauncherOverlay()
-                    } else if (msg === "emoji-toggle") {
+
+                        return
+                    }
+
+                    if (msg === "emoji-toggle") {
                         AppState.toggleEmojiPickerOverlay()
-                    } else if (msg.startsWith("osd-volume:")) {
+
+                        return
+                    }
+
+                    if (msg.startsWith("osd-volume:")) {
                         // "osd-volume:<0-100>:<muted|unmuted>"
                         var parts = msg.split(":")
                         OsdData.showVolume(parseInt(parts[1]) || 0, parts[2] === "muted")
-                    } else if (msg.startsWith("osd-brightness:")) {
+
+                        return
+                    }
+
+                    if (msg.startsWith("osd-brightness:")) {
                         // "osd-brightness:<0-100>"
                         OsdData.showBrightness(parseInt(msg.split(":")[1]) || 0)
-                    } else {
-                        console.log("Unknown command:", msg)
+
+                        return
                     }
+                    console.log("Unknown command:", msg)
                 }
             }
 

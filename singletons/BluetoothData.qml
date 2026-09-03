@@ -74,11 +74,8 @@ Singleton {
 
         stdout: SplitParser {
             onRead: data => {
-                if (data.startsWith("POWERED:")) {
-                    powered = data.substring(8) === "1"
-                } else if (data.startsWith("CONNECTED:")) {
-                    connectedDevice = data.substring(10)
-                }
+                if (data.startsWith("POWERED:"))   { powered = data.substring(8) === "1"; return }
+                if (data.startsWith("CONNECTED:")) { connectedDevice = data.substring(10) }
             }
         }
     }

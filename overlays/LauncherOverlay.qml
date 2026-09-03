@@ -105,31 +105,50 @@ PanelWindow {
             if (event.key === Qt.Key_Escape) {
                 root.closeOverlay()
                 event.accepted = true
-            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+
+                return
+            }
+
+            if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                 root.launchSelected()
                 event.accepted = true
-            } else if (event.key === Qt.Key_Up
-                       || (event.key === Qt.Key_K && (event.modifiers & Qt.ControlModifier))) {
+
+                return
+            }
+
+            if (event.key === Qt.Key_Up
+                || (event.key === Qt.Key_K && (event.modifiers & Qt.ControlModifier))) {
                 if (root.selectedIndex > 0) {
                     root.selectedIndex--
                     resultList.positionViewAtIndex(root.selectedIndex, ListView.Contain)
                 }
                 event.accepted = true
-            } else if (event.key === Qt.Key_Down
-                       || (event.key === Qt.Key_J && (event.modifiers & Qt.ControlModifier))) {
+
+                return
+            }
+
+            if (event.key === Qt.Key_Down
+                || (event.key === Qt.Key_J && (event.modifiers & Qt.ControlModifier))) {
                 if (root.selectedIndex < root.filteredApps.length - 1) {
                     root.selectedIndex++
                     resultList.positionViewAtIndex(root.selectedIndex, ListView.Contain)
                 }
                 event.accepted = true
-            } else if (event.key === Qt.Key_Backspace) {
+
+                return
+            }
+
+            if (event.key === Qt.Key_Backspace) {
                 if (root.filterText.length > 0)
                     root.filterText = root.filterText.slice(0, -1)
                 event.accepted = true
-            } else if (event.text && event.text.length === 1
-                       && event.text.charCodeAt(0) >= 32
-                       && event.text.charCodeAt(0) !== 127
-                       && (event.modifiers === Qt.NoModifier || event.modifiers === Qt.ShiftModifier)) {
+
+                return
+            }
+            if (event.text && event.text.length === 1
+                && event.text.charCodeAt(0) >= 32
+                && event.text.charCodeAt(0) !== 127
+                && (event.modifiers === Qt.NoModifier || event.modifiers === Qt.ShiftModifier)) {
                 root.filterText += event.text
                 event.accepted = true
             }
