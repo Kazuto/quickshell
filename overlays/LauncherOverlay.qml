@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import "root:/"
+import "root:/singletons"
 
 PanelWindow {
     id: root
@@ -50,6 +51,9 @@ PanelWindow {
                 if (aStarts && !bStarts) return -1
                 if (!aStarts && bStarts) return 1
             }
+            var usageA = AppUsageData.usageOf(a.id)
+            var usageB = AppUsageData.usageOf(b.id)
+            if (usageA !== usageB) return usageB - usageA
             return a.name.localeCompare(b.name)
         })
         filteredApps = result
@@ -63,11 +67,17 @@ PanelWindow {
         function onApplicationsChanged() { root.buildFiltered() }
     }
 
+    Connections {
+        target: AppUsageData
+        function onUsageLoadedChanged() { root.buildFiltered() }
+    }
+
     // ── Launch ─────────────────────────────────────────────────────────────
     function launch(entry) {
         if (!entry) return
         var cmd = entry.execString.replace(/%[fFuUcCkdki%]/g, "").trim()
         if (!cmd) return
+        AppUsageData.recordUsage(entry.id)
         Qt.createQmlObject(
             'import Quickshell.Io; Process { command: ["hyprctl", "dispatch", "exec", ' + JSON.stringify(cmd) + ']; running: true }',
             root

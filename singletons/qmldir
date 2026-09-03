@@ -9,3 +9,4 @@ singleton SystemData 1.0 SystemData.qml
 singleton WifiData 1.0 WifiData.qml
 singleton OsdData 1.0 OsdData.qml
 singleton EmojiData 1.0 EmojiData.qml
+singleton AppUsageData 1.0 AppUsageData.qml
