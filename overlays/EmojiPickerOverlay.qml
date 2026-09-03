@@ -4,6 +4,8 @@ import Quickshell.Io
 import Quickshell.Wayland
 import "root:/"
 import "root:/singletons"
+import "root:/components"
+import "root:/js/KeyNav.js" as KeyNav
 
 PanelWindow {
     id: root
@@ -109,46 +111,42 @@ PanelWindow {
         focus: true
 
         Keys.onPressed: function(event) {
-            if (event.key === Qt.Key_Escape) {
+            if (KeyNav.isEscape(event)) {
                 root.closeOverlay()
                 event.accepted = true
 
                 return
             }
 
-            if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            if (KeyNav.isConfirm(event)) {
                 root.commitSelected()
                 event.accepted = true
 
                 return
             }
 
-            if (event.key === Qt.Key_Left
-                || (event.key === Qt.Key_H && (event.modifiers & Qt.ControlModifier))) {
+            if (KeyNav.isPrevColumn(event)) {
                 if (root.selectedIndex > 0) root.selectedIndex--
                 event.accepted = true
 
                 return
             }
 
-            if (event.key === Qt.Key_Right
-                || (event.key === Qt.Key_L && (event.modifiers & Qt.ControlModifier))) {
+            if (KeyNav.isNextColumn(event)) {
                 if (root.selectedIndex < root.filteredEmojis.length - 1) root.selectedIndex++
                 event.accepted = true
 
                 return
             }
 
-            if (event.key === Qt.Key_Up
-                || (event.key === Qt.Key_K && (event.modifiers & Qt.ControlModifier))) {
+            if (KeyNav.isPrev(event)) {
                 if (root.selectedIndex - root.columns >= 0) root.selectedIndex -= root.columns
                 event.accepted = true
 
                 return
             }
 
-            if (event.key === Qt.Key_Down
-                || (event.key === Qt.Key_J && (event.modifiers & Qt.ControlModifier))) {
+            if (KeyNav.isNext(event)) {
                 if (root.selectedIndex + root.columns < root.filteredEmojis.length)
                     root.selectedIndex += root.columns
                 event.accepted = true
@@ -156,17 +154,15 @@ PanelWindow {
                 return
             }
 
-            if (event.key === Qt.Key_Backspace) {
+            if (KeyNav.isBackspace(event)) {
                 if (root.filterText.length > 0)
                     root.filterText = root.filterText.slice(0, -1)
                 event.accepted = true
 
                 return
             }
-            if (event.text && event.text.length === 1
-                && event.text.charCodeAt(0) >= 32
-                && event.text.charCodeAt(0) !== 127
-                && (event.modifiers === Qt.NoModifier || event.modifiers === Qt.ShiftModifier)) {
+
+            if (KeyNav.isPrintableChar(event)) {
                 root.filterText += event.text
                 event.accepted = true
             }
@@ -256,7 +252,7 @@ PanelWindow {
                     }
 
                     Rectangle {
-                        visible: cursorTimer.cursorVisible
+                        visible: blinkCursor.cursorVisible
                         width: 2
                         height: 18
                         radius: 1
@@ -364,14 +360,9 @@ PanelWindow {
         }
     }
 
-    Timer {
-        id: cursorTimer
-        property bool cursorVisible: true
-        interval: 530
-        repeat: true
-        running: root.visible
-        onTriggered: cursorVisible = !cursorVisible
-        onRunningChanged: if (running) cursorVisible = true
+    BlinkCursor {
+        id: blinkCursor
+        active: root.visible
     }
 
     onVisibleChanged: {
