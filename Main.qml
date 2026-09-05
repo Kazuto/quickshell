@@ -223,6 +223,12 @@ Rectangle {
         visible: AppState.emojiPickerOverlayVisible
     }
 
+    // Wallpaper Picker overlay
+    Overlays.WallpaperPickerOverlay {
+        id: wallpaperPickerOverlay
+        visible: AppState.wallpaperPickerOverlayVisible
+    }
+
     // OSD (volume / brightness)
     Overlays.OsdOverlay {
         id: osdOverlay
@@ -280,6 +286,12 @@ Rectangle {
 
                     if (msg === "emoji-toggle") {
                         AppState.toggleEmojiPickerOverlay()
+
+                        return
+                    }
+
+                    if (msg === "wallpaper-toggle") {
+                        AppState.toggleWallpaperPickerOverlay()
 
                         return
                     }

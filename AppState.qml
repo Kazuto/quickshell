@@ -27,6 +27,7 @@ Singleton {
     property bool batteryOverlayVisible: false
     property bool launcherOverlayVisible: false
     property bool emojiPickerOverlayVisible: false
+    property bool wallpaperPickerOverlayVisible: false
     property bool isRecording: false
 
     function closeAllOverlays() {
@@ -48,6 +49,7 @@ Singleton {
         batteryOverlayVisible = false
         launcherOverlayVisible = false
         emojiPickerOverlayVisible = false
+        wallpaperPickerOverlayVisible = false
     }
 
     function toggleSpotifyOverlay() {
@@ -168,5 +170,12 @@ Singleton {
             closeAllOverlays()
         }
         emojiPickerOverlayVisible = !emojiPickerOverlayVisible
+    }
+
+    function toggleWallpaperPickerOverlay() {
+        if (!wallpaperPickerOverlayVisible) {
+            closeAllOverlays()
+        }
+        wallpaperPickerOverlayVisible = !wallpaperPickerOverlayVisible
     }
 }

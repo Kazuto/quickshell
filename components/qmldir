@@ -8,3 +8,4 @@ ModuleGroup 1.0 ModuleGroup.qml
 ModuleDivider 1.0 ModuleDivider.qml
 NotificationToast 1.0 NotificationToast.qml
 BlinkCursor 1.0 BlinkCursor.qml
+Carousel 1.0 Carousel.qml
