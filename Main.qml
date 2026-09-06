@@ -37,6 +37,7 @@ Rectangle {
         ]
 
         rightItems: [
+            Modules.Tray {},
             Components.ModuleGroup {
                 items: [
                     Modules.Notifications { color: "transparent"; radius: 0 },
@@ -227,6 +228,17 @@ Rectangle {
     Overlays.WallpaperPickerOverlay {
         id: wallpaperPickerOverlay
         visible: AppState.wallpaperPickerOverlayVisible
+    }
+
+    // System tray context menu
+    Overlays.TrayMenuOverlay {
+        id: trayMenuOverlay
+        visible: AppState.trayMenuOverlayVisible
+    }
+
+    // System tray hover tooltip
+    Overlays.TrayTooltipOverlay {
+        id: trayTooltipOverlay
     }
 
     // OSD (volume / brightness)
