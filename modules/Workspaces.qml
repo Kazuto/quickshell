@@ -26,7 +26,7 @@ Rectangle {
                 {num: startWorkspace + 1, icon: Icon.ghostty},
                 {num: startWorkspace + 2, icon: Icon.database},
                 {num: startWorkspace + 3, icon: Icon.code},
-                {num: startWorkspace + 4, icon: Icon.thunderbird},
+                {num: startWorkspace + 4, icon: Icon.mail},
             ]
 
             delegate: Item {

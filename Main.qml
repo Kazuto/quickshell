@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Services.SystemTray
 
 import "root:/"
 import "./singletons"
@@ -62,9 +63,10 @@ Rectangle {
         ]
 
         rightItems: [
-            Modules.Tray {},
             Components.ModuleGroup {
                 items: [
+                    Modules.Tray         { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider { visible: SystemTray.items.values.length > 0 },
                     Modules.Notifications { color: "transparent"; radius: 0 },
                     Components.ModuleDivider {},
                     Modules.Timer        { color: "transparent"; radius: 0 },

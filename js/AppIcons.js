@@ -23,6 +23,11 @@ function normalize(id) {
 
 // Ordered so more specific keys can be listed before broader ones if ever
 // needed; lookup just takes the first substring match.
+// `offsetX` is an optional manual horizontal nudge (in px) for glyphs whose
+// font has an asymmetric left/right side-bearing baked in — generic
+// centering (anchors.centerIn / AlignHCenter) centers the glyph's *declared*
+// bounding box, which doesn't always match where the visible ink actually
+// sits, so some glyphs need a small manual correction to look centered.
 var ENTRIES = [
     { match: ["ghostty"],               char: "\uEAD9", font: "sketchybar-app-font" },
     { match: ["firefox"],               char: "\uEABF", font: "sketchybar-app-font" },
@@ -31,7 +36,7 @@ var ENTRIES = [
     { match: ["slack"],                 char: "\uEC04", font: "sketchybar-app-font" },
     { match: ["vesktop"],               char: "\uEC51", font: "sketchybar-app-font" },
     { match: ["discord"],               char: "\uEA9C", font: "sketchybar-app-font" },
-    { match: ["spotify"],               char: "\uEC0F", font: "sketchybar-app-font" },
+    { match: ["spotify"],               char: "\uEC0F", font: "sketchybar-app-font", offsetX: 3 },
     { match: ["dolphin"],               char: "\uEAA0", font: "sketchybar-app-font" },
     { match: ["kitty"],                 char: "\uEB22", font: "sketchybar-app-font" },
     { match: ["obsidian"],              char: "\uEB81", font: "sketchybar-app-font" },
@@ -77,13 +82,13 @@ function findEntry(id, table) {
     return null
 }
 
-// Returns { char, font } or null if there's no known glyph for this id.
-// `font` is either "sketchybar-app-font" or null (meaning: use the
-// caller's regular Nerd Font family).
+// Returns { char, font, offsetX } or null if there's no known glyph for
+// this id. `font` is either "sketchybar-app-font" or null (meaning: use
+// the caller's regular Nerd Font family). `offsetX` defaults to 0.
 function glyphFor(id) {
     var entry = findEntry(id, ENTRIES)
     if (!entry) return null
-    return { char: entry.char, font: entry.font }
+    return { char: entry.char, font: entry.font, offsetX: entry.offsetX || 0 }
 }
 
 // Returns a human-readable app name for this id, falling back to the

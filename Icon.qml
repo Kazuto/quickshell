@@ -40,6 +40,7 @@ Singleton {
     property string recordActive: "󰑊"
     property string vpn: "󰖂"
     property string mouse: ""
+    property string mail: ""
 
     // Application Icons
     property string chrome: ""

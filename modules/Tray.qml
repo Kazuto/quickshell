@@ -10,10 +10,17 @@ Rectangle {
 
     readonly property var items: SystemTray.items.values
     readonly property int itemCount: items.length
-    readonly property int iconSize: Config.moduleFontSize + 6
+    // Icon glyph/image render size — the cell itself is a full Config.barHeight
+    // square (matching every other bar module), this is just the visual size
+    // of the icon drawn centered inside it.
+    readonly property int iconSize: Config.moduleFontSize
 
     visible: itemCount > 0
-    implicitWidth: visible ? row.implicitWidth + 8 : 0
+    // No extra padding here — matches every other grouped module's bare
+    // Config.barHeight footprint with zero wrapping, so icons sit flush
+    // against the shared ModuleGroup pill instead of getting their own
+    // breathing room within it.
+    implicitWidth: visible ? row.implicitWidth : 0
     implicitHeight: Config.barHeight
     color: Config.moduleBackground
     radius: Config.moduleRadius
@@ -21,7 +28,7 @@ Rectangle {
     Row {
         id: row
         anchors.centerIn: parent
-        spacing: 2
+        spacing: 0
 
         Repeater {
             model: root.items
@@ -43,8 +50,11 @@ Rectangle {
                 readonly property string label: AppIcons.labelFor(cell.modelData.id)
                     || cell.modelData.tooltipTitle || cell.modelData.title || cell.modelData.id || ""
 
-                width: root.iconSize
-                height: root.iconSize
+                // Fixed square footprint matching every other bar module
+                // (e.g. Bluetooth.qml, Audio.qml) so icon density/spacing
+                // stays visually consistent across the whole bar.
+                width: Config.barHeight
+                height: Config.barHeight
 
                 Rectangle {
                     anchors.fill: parent
@@ -55,6 +65,7 @@ Rectangle {
                 Text {
                     visible: !!cell.glyph
                     anchors.centerIn: parent
+                    anchors.horizontalCenterOffset: cell.glyph ? cell.glyph.offsetX : 0
                     text: cell.glyph ? cell.glyph.char : ""
                     font.family: cell.glyph && cell.glyph.font ? cell.glyph.font : Config.moduleFontFamily
                     font.pixelSize: Config.moduleFontSize
@@ -63,8 +74,9 @@ Rectangle {
 
                 Image {
                     id: trayIconImage
-                    anchors.fill: parent
-                    anchors.margins: 3
+                    anchors.centerIn: parent
+                    width: root.iconSize
+                    height: root.iconSize
                     source: cell.glyph ? "" : String(cell.modelData.icon || "")
                     fillMode: Image.PreserveAspectFit
                     asynchronous: true
