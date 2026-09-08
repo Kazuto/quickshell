@@ -49,46 +49,78 @@ Rectangle {
         return result
     }
 
+    // Explicit refresh trigger — incremented whenever a window opens,
+    // closes, or moves workspace. Each workspace cell's windowClasses
+    // depends on this counter (rather than relying on Hyprland.toplevels'
+    // own change notifications directly), because a *newly opened*
+    // window's lastIpcObject isn't populated yet at the exact moment
+    // Hyprland.toplevels.valuesChanged first fires — even an explicit
+    // Hyprland.refreshToplevels() call doesn't reliably produce a second
+    // valuesChanged once that data lands. Waiting a short beat and then
+    // recomputing directly sidesteps that gap.
+    property int refreshTrigger: 0
+
+    Connections {
+        target: Hyprland
+        function onRawEvent(event) {
+            var relevant = ["openwindow", "closewindow", "movewindow", "workspace"]
+            if (relevant.indexOf(event.name) >= 0) refreshDelayTimer.restart()
+        }
+    }
+
+    Timer {
+        id: refreshDelayTimer
+        interval: 350
+        repeat: false
+        onTriggered: {
+            Hyprland.refreshToplevels()
+            root.refreshTrigger++
+        }
+    }
+
     Row {
         id: workspaceRow
         anchors.centerIn: parent
         spacing: Config.workspaceSpacing
 
         Repeater {
-            // Each workspace here mirrors the app hyprland.conf actually
-            // pins to it via `exec-once = [workspace N silent] <app>`, so
-            // the icon always matches what's really running there. This is
-            // used as the *empty-workspace* fallback icon only — once a
-            // workspace has real windows, it shows those apps' own icons
-            // instead (see windowClassesForWorkspace above).
+            // Just the workspace numbers — the icon shown per slot is now
+            // fully dynamic (see displayIcons below): whatever app(s) are
+            // actually running there, or a neutral empty-workspace dot when
+            // there's nothing open. Showing the app that's *pinned* to an
+            // empty workspace (e.g. a grayed-out Bruno icon after quitting
+            // it) reads like a lingering/zombie state, so that fallback was
+            // dropped in favor of this simpler, always-accurate indicator.
             model: defaultIcon !== "" ? [
-                {num: startWorkspace + 0, icon: plainGlyph(defaultIcon)},
-                {num: startWorkspace + 1, icon: plainGlyph(defaultIcon)},
+                {num: startWorkspace + 0},
+                {num: startWorkspace + 1},
             ] : [
-                {num: startWorkspace + 0, icon: AppIcons.glyphFor("chrome") || plainGlyph(Icon.chrome)},      // google-chrome
-                {num: startWorkspace + 1, icon: AppIcons.glyphFor("ghostty") || plainGlyph(Icon.ghostty)},    // ghostty
-                {num: startWorkspace + 2, icon: AppIcons.glyphFor("tableplus") || plainGlyph(Icon.database)}, // tableplus
-                {num: startWorkspace + 3, icon: AppIcons.glyphFor("bruno") || plainGlyph(Icon.code)},         // bruno
-                {num: startWorkspace + 4, icon: AppIcons.glyphFor("protonmail") || plainGlyph(Icon.mail)},    // proton-mail
+                {num: startWorkspace + 0},
+                {num: startWorkspace + 1},
+                {num: startWorkspace + 2},
+                {num: startWorkspace + 3},
+                {num: startWorkspace + 4},
             ]
 
             delegate: Item {
                 id: cell
                 property int workspaceNum: modelData.num
-                property var workspaceIcon: modelData.icon
                 property bool isActive: false
-                property var windowClasses: []
 
-                // Derived from windowClasses (backed by Hyprland.toplevels)
-                // rather than Hyprland.workspaces directly — the latter
-                // doesn't reliably emit change notifications when a
-                // workspace's window count changes, so a binding on it gets
-                // stuck at its initial value instead of updating live.
+                // Depends on root.refreshTrigger (bumped on any relevant
+                // Hyprland event) rather than reading Hyprland.toplevels
+                // directly in a way that relies on its own change
+                // notifications — see the comment on refreshTrigger above.
+                readonly property var windowClasses: {
+                    var _trigger = root.refreshTrigger
+                    return root.windowClassesForWorkspace(workspaceNum)
+                }
+
                 readonly property bool hasWindows: windowClasses.length > 0
 
                 readonly property var displayIcons: hasWindows
                     ? windowClasses.map(function(c) { return root.glyphForClass(c) })
-                    : [workspaceIcon]
+                    : [root.plainGlyph(defaultIcon !== "" ? defaultIcon : Icon.emptyWorkspace)]
 
                 Binding on isActive {
                     value: {
@@ -96,11 +128,6 @@ Rectangle {
                         return Hyprland.focusedWorkspace.id === workspaceNum
                     }
                     when: Hyprland.focusedWorkspace !== undefined
-                }
-
-                Binding on windowClasses {
-                    value: root.windowClassesForWorkspace(workspaceNum)
-                    when: Hyprland.toplevels !== undefined
                 }
 
                 width: Math.max(Config.workspaceSize,
