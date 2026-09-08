@@ -13,10 +13,35 @@ Rectangle {
     anchors.fill: parent
     color: "transparent"
 
+    // Maps monitor description (from `hyprctl monitors -j`) to its current
+    // output name (e.g. "DP-8"). Hyprland's DP-x/HDMI-x names can change
+    // across reconnects/reboots, but the description (make/model/serial) is
+    // stable, so we resolve descriptions to names at runtime instead of
+    // hardcoding names.
+    property var monitorNameByDescription: ({})
+
+    Process {
+        id: monitorsProcess
+        running: true
+        command: ["hyprctl", "monitors", "-j"]
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const monitors = JSON.parse(this.text)
+                    const map = {}
+                    for (const m of monitors) map[m.description] = m.name
+                    monitorNameByDescription = map
+                } catch (e) {
+                    console.warn("Failed to parse hyprctl monitors output:", e)
+                }
+            }
+        }
+    }
+
     Component.onCompleted: {
         // Use the bar's screen width for overlay positioning
-        var barScreen = Quickshell.screens.find(s => s.name === "HDMI-A-1")
-            || Quickshell.screens.find(s => s.primary)
+        var barScreen = Quickshell.screens.find(s => s.primary)
             || Quickshell.screens[0]
         if (barScreen) AppState.screenWidth = barScreen.width
         console.log("QuickShell started with IPC on:", ipcSocket.path)
@@ -68,10 +93,21 @@ Rectangle {
         ]
     }
 
-    function screenByName(name) {
+    // Resolves a monitor by its stable hardware description (as used in
+    // ~/.config/hypr/monitors.conf) rather than its Hyprland output name
+    // (DP-x/HDMI-x), since output names can change across reconnects/reboots.
+    function findScreenByDescription(description) {
+        const name = monitorNameByDescription[description]
+
+        if (!name) {
+            console.warn(`No monitor name found for description "${description}", available:`,
+                monitorNameByDescription)
+            return undefined
+        }
+
         const s = Quickshell.screens.find(s => s.name === name)
 
-        if (!s) console.warn(`No screen found for name ${name}, available:`,
+        if (!s) console.warn(`No screen found for ${name}, available:`,
             Quickshell.screens.map(s => s.name))
 
         return s
@@ -80,7 +116,7 @@ Rectangle {
     // Bar (Secondary Display - Workspaces Only)
     Windows.Bar {
         id: barSecondary
-        screen:screenByName("DP-10") 
+        screen: findScreenByDescription("GIGA-BYTE TECHNOLOGY CO. LTD. GS27QCA 25355B006220")
 
         leftItems: [
             Modules.Workspaces {
@@ -96,7 +132,7 @@ Rectangle {
     // Bar (Third Display - Left Side - Workspaces Only)
     Windows.Bar {
         id: barTertiary
-        screen: screenByName("DP-12")
+        screen: findScreenByDescription("GIGA-BYTE TECHNOLOGY CO. LTD. GS27QCA 25465B003652")
 
         leftItems: [
             Modules.Workspaces {
