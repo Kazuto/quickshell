@@ -44,6 +44,8 @@ var ENTRIES = [
     { match: ["thunderbird"],           char: "\uEC34", font: "sketchybar-app-font" },
     { match: ["vivaldi"],               char: "\uEC56", font: "sketchybar-app-font" },
     { match: ["docker"],                char: "\uEA9E", font: "sketchybar-app-font" },
+    { match: ["protonmail"],            char: "\uEBC3", font: "sketchybar-app-font" },
+    { match: ["tableplus"],             char: "\uEC25", font: "sketchybar-app-font" },
     // No sketchybar-app-font glyph for 1Password — fall back to the Nerd
     // Font lock icon (same codepoint as Icon.qml's `lock` property).
     { match: ["onepassword", "1password"], char: "\uF023", font: null },
@@ -67,6 +69,8 @@ var LABELS = [
     { match: ["thunderbird"],             label: "Thunderbird" },
     { match: ["vivaldi"],                 label: "Vivaldi" },
     { match: ["docker"],                  label: "Docker" },
+    { match: ["protonmail"],              label: "Proton Mail" },
+    { match: ["tableplus"],               label: "TablePlus" },
     { match: ["onepassword", "1password"], label: "1Password" },
 ]
 

@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import "root:/"
+import "root:/js/AppIcons.js" as AppIcons
 
 Rectangle {
     property int startWorkspace: 1  // Starting workspace number
@@ -12,26 +13,37 @@ Rectangle {
     color: Config.moduleBackground
     radius: Config.moduleRadius
 
+    // Normalizes both the "defaultIcon" (plain Nerd Font glyph string, used
+    // by the secondary/tertiary bars) and AppIcons.js glyph lookups into the
+    // same {char, font, offsetX} shape so the delegate below doesn't need
+    // to care which source a given workspace's icon came from.
+    function plainGlyph(glyphChar) {
+        return { char: glyphChar, font: null, offsetX: 0 }
+    }
+
     Row {
         id: workspaceRow
         anchors.centerIn: parent
         spacing: Config.workspaceSpacing
 
         Repeater {
+            // Each workspace here mirrors the app hyprland.conf actually
+            // pins to it via `exec-once = [workspace N silent] <app>`, so
+            // the icon always matches what's really running there.
             model: defaultIcon !== "" ? [
-                {num: startWorkspace + 0, icon: defaultIcon},
-                {num: startWorkspace + 1, icon: defaultIcon},
+                {num: startWorkspace + 0, icon: plainGlyph(defaultIcon)},
+                {num: startWorkspace + 1, icon: plainGlyph(defaultIcon)},
             ] : [
-                {num: startWorkspace + 0, icon: Icon.chrome},
-                {num: startWorkspace + 1, icon: Icon.ghostty},
-                {num: startWorkspace + 2, icon: Icon.database},
-                {num: startWorkspace + 3, icon: Icon.code},
-                {num: startWorkspace + 4, icon: Icon.mail},
+                {num: startWorkspace + 0, icon: AppIcons.glyphFor("chrome") || plainGlyph(Icon.chrome)},      // google-chrome
+                {num: startWorkspace + 1, icon: AppIcons.glyphFor("ghostty") || plainGlyph(Icon.ghostty)},    // ghostty
+                {num: startWorkspace + 2, icon: AppIcons.glyphFor("tableplus") || plainGlyph(Icon.database)}, // tableplus
+                {num: startWorkspace + 3, icon: AppIcons.glyphFor("bruno") || plainGlyph(Icon.code)},         // bruno
+                {num: startWorkspace + 4, icon: AppIcons.glyphFor("protonmail") || plainGlyph(Icon.mail)},    // proton-mail
             ]
 
             delegate: Item {
                 property int workspaceNum: modelData.num
-                property string workspaceIcon: modelData.icon
+                property var workspaceIcon: modelData.icon
                 property bool isActive: false
                 property bool hasWindows: false
 
@@ -61,12 +73,13 @@ Rectangle {
 
                 Text {
                     anchors.centerIn: parent
-                    text: workspaceIcon
+                    anchors.horizontalCenterOffset: workspaceIcon.offsetX
+                    text: workspaceIcon.char
                     color: isActive ? Config.workspaceActive :
                            (wsMouseArea.containsMouse ? Config.workspaceActive :
                            (hasWindows ? Config.moduleText : Config.moduleTextMuted))
                     font.pixelSize: Config.workspaceIconSize
-                    font.family: Config.moduleFontFamily
+                    font.family: workspaceIcon.font || Config.moduleFontFamily
                     z: 0
 
                     Behavior on color {
