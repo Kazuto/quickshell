@@ -11,3 +11,4 @@ singleton OsdData 1.0 OsdData.qml
 singleton EmojiData 1.0 EmojiData.qml
 singleton AppUsageData 1.0 AppUsageData.qml
 singleton WallpaperData 1.0 WallpaperData.qml
+singleton CaffeineData 1.0 CaffeineData.qml

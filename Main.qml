@@ -73,6 +73,8 @@ Rectangle {
                     Components.ModuleDivider {},
                     Modules.ScreenRecorder { color: "transparent"; radius: 0 },
                     Components.ModuleDivider {},
+                    Modules.Caffeine     { color: "transparent"; radius: 0 },
+                    Components.ModuleDivider {},
                     Modules.GitHub       { color: "transparent"; radius: 0 },
                     Components.ModuleDivider {},
                     Modules.Logitech     { color: "transparent"; radius: 0 },
