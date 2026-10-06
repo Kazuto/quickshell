@@ -23,7 +23,7 @@ PanelWindow {
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
     // ── data ─────────────────────────────────────────────────────────────────
-    property bool    connected:   false
+    readonly property bool connected: VpnData.connected
     property string  tunnelIp:    "—"
     property string  server:      "—"
     property string  protocol:    "—"
@@ -31,7 +31,7 @@ PanelWindow {
     property string  rxBytes:     "—"
     property string  txBytes:     "—"
     property string  ping:        "—"
-    property string  connName:    "my-vpn"
+    readonly property string connName: VpnData.connectionName
 
     function formatBytes(b) {
         var n = parseInt(b) || 0
@@ -42,19 +42,22 @@ PanelWindow {
     }
 
     function refresh() {
-        infoProc.running = false
-        infoProc.running = true
-        pingProc.running = false
-        pingProc.running = true
+        VpnData.refresh()
+        refreshDetails()
+    }
+
+    function refreshDetails() {
+        if (!connected) return
+        if (!infoProc.running) infoProc.running = true
+        if (!pingProc.running) pingProc.running = true
     }
 
     Process {
         id: infoProc
         command: ["sh", "-c",
-            "NAME=my-vpn;" +
-            "STATE=$(nmcli -t -f NAME,STATE connection show --active 2>/dev/null | grep \"^$NAME:\" | cut -d: -f2);" +
+            "export LC_ALL=C; NAME=$1;" +
+            "STATE=$(nmcli -g GENERAL.STATE connection show \"$NAME\" 2>/dev/null);" +
             "if [ \"$STATE\" = \"activated\" ]; then" +
-            "  echo CONNECTED:yes;" +
             "  IFACE=$(ip -o link show type tun 2>/dev/null | awk -F\": \" \"{print \\$2}\" | head -1);" +
             "  [ -z \"$IFACE\" ] && IFACE=$(ip -o link show | grep tun | awk -F\": \" \"{print \\$2}\" | head -1);" +
             "  echo \"IFACE:$IFACE\";" +
@@ -62,16 +65,15 @@ PanelWindow {
             "  echo \"IP:$IP\";" +
             "  SERVER=$(nmcli connection show \"$NAME\" 2>/dev/null | grep vpn.data | grep -o \"remote = [^,]*\" | sed \"s/remote = //\");" +
             "  echo \"SERVER:$SERVER\";" +
-            "  PROTO=$(nmcli connection show \"$NAME\" 2>/dev/null | grep VPN.TYPE | awk \"{print \\$2}\");" +
+            "  PROTO=$(nmcli -g vpn.service-type connection show \"$NAME\" 2>/dev/null); PROTO=${PROTO##*.};" +
             "  echo \"PROTO:$PROTO\";" +
             "  STATS=$(grep \"$IFACE\" /proc/net/dev | awk \"{print \\$2, \\$10}\");" +
             "  echo \"RX:$(echo $STATS | awk \"{print \\$1}\")\";" +
             "  echo \"TX:$(echo $STATS | awk \"{print \\$2}\")\";" +
-            "else echo CONNECTED:no; fi"
+            "fi", "vpn-info", vpnOverlay.connName
         ]
         stdout: SplitParser {
             onRead: line => {
-                if (line.startsWith("CONNECTED:")) { vpnOverlay.connected = line.substring(10).trim() === "yes"; return }
                 if (line.startsWith("IFACE:"))     { vpnOverlay.iface     = line.substring(6).trim(); return }
                 if (line.startsWith("IP:"))        { vpnOverlay.tunnelIp  = line.substring(3).trim(); return }
                 if (line.startsWith("SERVER:"))    { vpnOverlay.server    = line.substring(7).trim(); return }
@@ -85,8 +87,8 @@ PanelWindow {
     Process {
         id: pingProc
         command: ["sh", "-c", "ping -c 1 -W 2 8.8.8.8 2>/dev/null | awk -F'time=' '/time=/{print $2}' | awk '{print $1 \" ms\"}'"]
-        stdout: SplitParser {
-            onRead: line => { vpnOverlay.ping = line.trim() !== "" ? line.trim() : "timeout" }
+        stdout: StdioCollector {
+            onStreamFinished: vpnOverlay.ping = text.trim() || "timeout"
         }
         onRunningChanged: { if (running) vpnOverlay.ping = "…" }
     }
@@ -96,10 +98,18 @@ PanelWindow {
         interval: 3000
         running: vpnOverlay.visible && vpnOverlay.connected
         repeat: true
-        onTriggered: { infoProc.running = false; infoProc.running = true }
+        onTriggered: refreshDetails()
     }
 
     onVisibleChanged: { if (visible) refresh() }
+    Component.onCompleted: { if (visible) refresh() }
+    onConnectedChanged: {
+        if (connected) {
+            if (visible) refreshDetails()
+        } else {
+            tunnelIp = server = protocol = iface = rxBytes = txBytes = ping = "—"
+        }
+    }
 
     // ── UI ───────────────────────────────────────────────────────────────────
     MouseArea {
@@ -173,6 +183,7 @@ PanelWindow {
                         : Config.alpha(Theme.green, toggleMouse.containsMouse ? 0.25 : 0.15)
                     border.color: vpnOverlay.connected ? Theme.red : Theme.green
                     border.width: 1
+                    opacity: VpnData.busy || VpnData.checking ? 0.5 : 1.0
 
                     Behavior on width { NumberAnimation { duration: 150 } }
                     Behavior on color { ColorAnimation { duration: 150 } }
@@ -180,7 +191,7 @@ PanelWindow {
                     Text {
                         id: labelText
                         anchors.centerIn: parent
-                        text: vpnOverlay.connected ? "Disconnect" : "Connect"
+                        text: VpnData.busy ? "Working…" : (vpnOverlay.connected ? "Disconnect" : "Connect")
                         color: vpnOverlay.connected ? Theme.red : Theme.green
                         font.pixelSize: 11
                         font.family: Config.moduleFontFamily
@@ -199,11 +210,9 @@ PanelWindow {
                         id: toggleMouse
                         anchors.fill: parent
                         hoverEnabled: true
+                        enabled: !VpnData.busy && !VpnData.checking
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            toggleProc.running = false
-                            toggleProc.running = true
-                        }
+                        onClicked: VpnData.toggle()
                     }
                 }
             }
@@ -221,7 +230,7 @@ PanelWindow {
 
                 Text {
                     anchors.centerIn: parent
-                    text: vpnOverlay.connected
+                    text: VpnData.busy ? "◌ Updating VPN connection…" : vpnOverlay.connected
                         ? "● Connected — " + vpnOverlay.connName
                         : "○ Not connected"
                     color: vpnOverlay.connected ? Theme.green : Theme.overlay0
@@ -229,6 +238,16 @@ PanelWindow {
                     font.family: Config.moduleFontFamily
                     font.bold: vpnOverlay.connected
                 }
+            }
+
+            Text {
+                width: parent.width
+                visible: VpnData.error !== ""
+                text: VpnData.error
+                wrapMode: Text.Wrap
+                color: Theme.red
+                font.pixelSize: 11
+                font.family: Config.moduleFontFamily
             }
 
             // ── Details ───────────────────────────────────────────────────
@@ -349,16 +368,6 @@ PanelWindow {
                     }
                 }
             }
-        }
-    }
-
-    Process {
-        id: toggleProc
-        command: vpnOverlay.connected
-            ? ["nmcli", "connection", "down", vpnOverlay.connName]
-            : ["nmcli", "connection", "up",   vpnOverlay.connName]
-        onExited: {
-            Qt.callLater(() => { infoProc.running = false; infoProc.running = true })
         }
     }
 
