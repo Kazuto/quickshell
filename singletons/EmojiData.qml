@@ -15,6 +15,21 @@ Singleton {
     property bool usageLoaded: false
     readonly property string usagePath: "~/.cache/quickshell/emoji_usage.json"
 
+    readonly property var kaomoji: [
+        { glyph: "¯\\_(ツ)_/¯", name: "shrug", keywords: "whatever", category: "kaomoji" },
+        { glyph: "(╯°□°)╯︵ ┻━┻", name: "table flip", keywords: "angry rage", category: "kaomoji" },
+        { glyph: "┬─┬ノ( º _ ºノ)", name: "put table back", keywords: "calm", category: "kaomoji" },
+        { glyph: "( ͡° ͜ʖ ͡°)", name: "lenny", keywords: "smirk", category: "kaomoji" },
+        { glyph: "(ಠ_ಠ)", name: "disapproval", keywords: "stare", category: "kaomoji" },
+        { glyph: "(づ｡◕‿‿◕｡)づ", name: "hug", keywords: "love", category: "kaomoji" },
+        { glyph: "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧", name: "sparkles", keywords: "magic happy", category: "kaomoji" },
+        { glyph: "(•_•)", name: "neutral", keywords: "blank", category: "kaomoji" },
+        { glyph: "(^_^;)", name: "nervous", keywords: "sweat", category: "kaomoji" },
+        { glyph: "(T_T)", name: "crying", keywords: "sad", category: "kaomoji" },
+        { glyph: "ʕ•ᴥ•ʔ", name: "bear", keywords: "cute", category: "kaomoji" },
+        { glyph: "(=^･ω･^=)", name: "cat", keywords: "cute", category: "kaomoji" }
+    ]
+
     function usageOf(glyph) {
         return usageCounts[glyph] || 0
     }
@@ -24,6 +39,23 @@ Singleton {
         next[glyph] = (next[glyph] || 0) + 1
         usageCounts = next
         saveUsage()
+    }
+
+    // Copies the glyph and, unless copyOnly, pastes it into whichever window
+    // gets focus back once the picker has closed.
+    function commit(glyph, copyOnly) {
+        recordUsage(glyph)
+        Quickshell.execDetached(["wl-copy", glyph])
+        if (!copyOnly) typeTimer.restart()
+    }
+
+    Timer {
+        id: typeTimer
+        interval: 320
+        repeat: false
+        // Ctrl+V rather than typing raw Unicode: Chromium/Electron apps don't
+        // reliably accept synthetic emoji keysyms from wtype.
+        onTriggered: Quickshell.execDetached(["wtype", "-M", "ctrl", "-k", "v", "-m", "ctrl"])
     }
 
     function shellQuote(str) {
@@ -87,21 +119,31 @@ Singleton {
         if (kwMatch) keywords = kwMatch[1]
 
         if (!glyph || !name) return null
-        return { glyph: glyph, name: name, keywords: keywords }
+        return { glyph: glyph, name: name, keywords: keywords, category: "other" }
     }
 
     Process {
         id: loadProc
-        command: ["cat"].concat(root.dataFiles)
+        command: ["sh", "-c", 'for f in "$@"; do echo "#FILE:$f"; cat "$f"; done', "sh"].concat(root.dataFiles)
         stdout: SplitParser {
             property var incoming: []
+            property string category: "other"
             onRead: line => {
+                if (line.startsWith("#FILE:")) {
+                    category = line.indexOf("smileys") >= 0 ? "smileys"
+                        : line.indexOf("people") >= 0 ? "people"
+                        : line.indexOf("symbols") >= 0 ? "symbols" : "other"
+                    return
+                }
                 var entry = root.parseLine(line)
-                if (entry) incoming = incoming.concat([entry])
+                if (entry) {
+                    entry.category = category
+                    incoming = incoming.concat([entry])
+                }
             }
         }
         onExited: {
-            root.emojis = loadProc.stdout.incoming
+            root.emojis = loadProc.stdout.incoming.concat(root.kaomoji)
             root.loaded = true
         }
     }

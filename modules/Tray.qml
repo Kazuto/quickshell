@@ -8,22 +8,18 @@ import "root:/js/AppIcons.js" as AppIcons
 Rectangle {
     id: root
 
+    required property var screen
     readonly property var items: SystemTray.items.values
+    // Hovered icon's name, shown by the row hosting the tray
+    property string hoveredLabel: ""
     readonly property int itemCount: items.length
-    // Icon glyph/image render size — the cell itself is a full Config.barHeight
-    // square (matching every other bar module), this is just the visual size
-    // of the icon drawn centered inside it.
-    readonly property int iconSize: Config.moduleFontSize
+    readonly property int cellSize: 28
+    readonly property int iconSize: 14
 
     visible: itemCount > 0
-    // No extra padding here — matches every other grouped module's bare
-    // Config.barHeight footprint with zero wrapping, so icons sit flush
-    // against the shared ModuleGroup pill instead of getting their own
-    // breathing room within it.
     implicitWidth: visible ? row.implicitWidth : 0
-    implicitHeight: Config.barHeight
-    color: Config.moduleBackground
-    radius: Config.moduleRadius
+    implicitHeight: cellSize
+    color: "transparent"
 
     Row {
         id: row
@@ -50,16 +46,13 @@ Rectangle {
                 readonly property string label: AppIcons.labelFor(cell.modelData.id)
                     || cell.modelData.tooltipTitle || cell.modelData.title || cell.modelData.id || ""
 
-                // Fixed square footprint matching every other bar module
-                // (e.g. Bluetooth.qml, Audio.qml) so icon density/spacing
-                // stays visually consistent across the whole bar.
-                width: Config.barHeight
-                height: Config.barHeight
+                width: root.cellSize
+                height: root.cellSize
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: Config.moduleRadius
-                    color: iconMa.containsMouse ? Config.moduleHoverBackground : "transparent"
+                    radius: width / 2
+                    color: iconMa.containsMouse ? Theme.surfaceHigh : "transparent"
                 }
 
                 Text {
@@ -68,8 +61,8 @@ Rectangle {
                     anchors.horizontalCenterOffset: cell.glyph ? cell.glyph.offsetX : 0
                     text: cell.glyph ? cell.glyph.char : ""
                     font.family: cell.glyph && cell.glyph.font ? cell.glyph.font : Config.moduleFontFamily
-                    font.pixelSize: Config.moduleFontSize
-                    color: Config.moduleText
+                    font.pixelSize: root.iconSize
+                    color: Theme.text
                 }
 
                 Image {
@@ -95,7 +88,7 @@ Rectangle {
                     source: trayIconImage
                     visible: !cell.glyph && cell.isSymbolic
                     colorization: 1.0
-                    colorizationColor: Theme.subtext0
+                    colorizationColor: Theme.textDim
                 }
 
                 MouseArea {
@@ -105,13 +98,13 @@ Rectangle {
                     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
                     cursorShape: Qt.PointingHandCursor
 
-                    onEntered: AppState.showTrayTooltip(cell.label, mapToItem(null, width / 2, 0).x)
-                    onExited: AppState.hideTrayTooltip()
+                    onEntered: root.hoveredLabel = cell.label
+                    onExited: root.hoveredLabel = ""
 
                     onClicked: function(mouse) {
                         if (mouse.button === Qt.RightButton) {
                             if (cell.modelData.menu) {
-                                AppState.lastClickX = mapToItem(null, width / 2, 0).x
+                                AppState.centerOverlaysOn(root.screen)
                                 AppState.openTrayMenu(cell.modelData.menu)
                             } else if (cell.modelData.onlyMenu !== true) {
                                 cell.modelData.display(iconMa.QsWindow.window,
@@ -122,7 +115,7 @@ Rectangle {
                             cell.modelData.secondaryActivate()
                         } else if (cell.modelData.onlyMenu) {
                             if (cell.modelData.menu) {
-                                AppState.lastClickX = mapToItem(null, width / 2, 0).x
+                                AppState.centerOverlaysOn(root.screen)
                                 AppState.openTrayMenu(cell.modelData.menu)
                             }
                         } else {

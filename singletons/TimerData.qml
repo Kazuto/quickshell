@@ -7,6 +7,8 @@ Singleton {
     property int remainingSeconds: 0
     property bool running: false
     property bool isPaused: false
+    readonly property real progress: totalSeconds > 0
+        ? Math.max(0, Math.min(1, remainingSeconds / totalSeconds)) : 0
 
     property string displayTime: formatTime(remainingSeconds)
 
@@ -67,8 +69,8 @@ Singleton {
 
                 // Notification when timer reaches 0
                 if (remainingSeconds === 0) {
-                    // Could send a notification here
-                    console.log("Timer finished!")
+                    Quickshell.execDetached(["notify-send", "-a", "Timer", "Timer finished",
+                        formatTime(totalSeconds) + " is up"])
                 }
             }
         }

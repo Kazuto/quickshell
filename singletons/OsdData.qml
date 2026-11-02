@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "root:/"
 
 Singleton {
     id: root
@@ -14,7 +15,7 @@ Singleton {
     property bool visible: false
 
     // Hide timer
-    property int hideDelay: 2000
+    property int hideDelay: Config.osdHoldMs
 
     function showVolume(vol, isMuted) {
         value = vol

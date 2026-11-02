@@ -1,104 +1,52 @@
 # QuickShell Configuration
 
-Qt/QML-based widget toolkit for creating custom overlays on Hyprland using proper IPC.
+The Island v1 desktop shell for Hyprland: one pill at the top center of every
+output, with everything else morphing out of it.
 
 ## Structure
 
-- `shell.qml` - Main entry point with IPC socket server
-- `Overlay.qml` - Example overlay widget (centered panel with controls)
-- `SpotifyOverlay.qml` - Spotify player overlay with album art and controls
-- `~/.local/bin/quickshell-toggle-overlay` - IPC toggle script
+- `windows/Island.qml` - the per-output window; picks what the outline shows
+- `windows/IslandScrim.qml` - click catcher and dim behind open panels
+- `components/IslandSurface.qml` - the outline and its motion
+- `modules/` - what the pill shows at rest: idle, media, transients, bubbles
+- `panels/` - everything that grows out of it, opened through `AppState.openPanel`
+- `overlays/` - what still opens as its own window: tray menus and Ollama
+- `singletons/IslandData.qml` - who gets the core, by the design's priority order
+- `Theme.qml`, `Config.qml` - the design tokens
 
-## Usage
+## IPC
 
-### Overlays
+Send commands to the socket at `/tmp/quickshell.sock`, for example
+`echo "launcher-toggle" | socat - UNIX-CONNECT:/tmp/quickshell.sock`.
 
-#### Example Overlay
-- Press **SUPER + O** to toggle
-- Or run: `echo "overlay-toggle" | socat - UNIX-CONNECT:/tmp/quickshell.sock`
+- Panels: `launcher-toggle`, `quick-toggle`, `emoji-toggle`, `hotkeys-toggle`,
+  `wallpaper-toggle`, `clipboard-toggle`, `media-toggle`, `notifications-toggle`,
+  `calendar-toggle`, `timer-toggle`, `recorder-toggle`, `control-toggle`,
+  `system-toggle` (also `menu-toggle`, `power-toggle`), `network-toggle`,
+  `bluetooth-toggle`, `audio-toggle`, `vpn-toggle`, `devices-toggle`,
+  `battery-toggle`, `monitor-toggle`
+- OSD: `osd-volume:<0-100>:<muted|unmuted>`, `osd-brightness:<0-100>`
 
-#### Spotify Overlay
-- **Click the Spotify module in Waybar** to toggle
-- Shows: Album art, track info, playback controls, progress bar
-- Middle-click Waybar module: Play/Pause
-- Scroll on Waybar module: Next/Previous track
-- Or run: `echo "spotify-toggle" | socat - UNIX-CONNECT:/tmp/quickshell.sock`
+## Developing
 
-### IPC Commands
-Send commands via Unix socket at `/tmp/quickshell.sock`:
+Quickshell hot-reloads the config it runs, so editing the deployed files changes
+the live shell. To work on a checkout beside it instead:
 
-**Example Overlay:**
-- `overlay-toggle` - Toggle overlay visibility
-- `overlay-show` - Show overlay
-- `overlay-hide` - Hide overlay
-
-**Spotify Overlay:**
-- `spotify-toggle` - Toggle Spotify overlay
-- `spotify-show` - Show Spotify overlay
-- `spotify-hide` - Hide Spotify overlay
-
-### Customization
-
-The overlay is built with QML (Qt Markup Language), which is similar to JavaScript/React.
-
-#### Modify the overlay:
-Edit `Overlay.qml` to customize:
-- **Size**: Change `width` and `height` in the container Rectangle
-- **Colors**: Modify `color` property (supports hex with alpha: `#AARRGGBB`)
-- **Layout**: Add/remove components in the ColumnLayout
-- **Actions**: Update `onClicked` handlers to run actual commands
-
-#### Example: Run a command on button click
-```qml
-RoundButton {
-    text: "🔒"
-    onClicked: {
-        // Run a shell command
-        Qt.callLater(() => {
-            var process = Qt.createQmlObject('import QtQuick 2.0; import Qt.labs.process 1.0; Process {}', parent);
-            process.start("swaylock");
-        })
-    }
-}
+```sh
+QS_DEV=1 quickshell -p path/to/quickshell
 ```
 
-#### Add more overlays:
-Create new `.qml` files and import them in `shell.qml`:
+`QS_DEV=1` uses `/tmp/quickshell-dev.sock` and reserves no screen space. Run it
+under `dbus-run-session` to also test the notification server, which otherwise
+stays with the live shell.
 
-```qml
-ShellRoot {
-    Overlay {}
-    StatusWidget {}  // Your new widget
-    MusicPlayer {}   // Another widget
-}
-```
+## Dependencies
 
-## Blur Effect
-
-For the frosted glass effect to work, ensure Hyprland blur is enabled:
-```conf
-decoration {
-    blur {
-        enabled = true
-        size = 3
-        passes = 3
-    }
-}
-```
-
-## Resources
-
-- [QuickShell Documentation](https://outfoxxed.me/quickshell/)
-- [QML Documentation](https://doc.qt.io/qt-6/qmlapplications.html)
-- [Qt Quick Controls](https://doc.qt.io/qt-6/qtquickcontrols-index.html)
+`cliphist`, `wf-recorder`, `slurp`, `grimblast`, `hyprpicker`, `awww`, `magick`,
+`brightnessctl`, `powerprofilesctl`, `pamixer` and `playerctl`-style MPRIS players
+for the rest.
 
 ## Troubleshooting
 
-### Overlay not showing
-1. Check if QuickShell is running: `pgrep quickshell`
-2. View logs: `journalctl --user -u quickshell -f` (if running as service)
-3. Test manually: `quickshell` in terminal
-
-### Keybind not working
-- Reload Hyprland: **SUPER + R**
-- Check keybind: `hyprctl binds | grep quickshell`
+- Overlay not showing: check `pgrep quickshell`, or run `quickshell` in a terminal
+- Keybind not working: reload with **SUPER + R**, check `hyprctl binds | grep quickshell`

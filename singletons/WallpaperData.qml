@@ -20,6 +20,13 @@ Singleton {
     property string current: ""
     property bool applying: false
 
+    // Hex color, or "" to use the default accent. Empty also means the
+    // "Derive accent from wallpaper" option is off.
+    property string accentOverride: ""
+    property bool deriveAccent: false
+    readonly property string accentPath: "$HOME/.cache/quickshell/accent"
+    property string selectedDimensions: ""
+
     function shellQuote(str) {
         return "'" + str.replace(/'/g, "'\\''") + "'"
     }
@@ -71,14 +78,95 @@ Singleton {
         onExited: root.loaded = true
     }
 
-    function apply(path) {
+    // output is an output name, or empty for every output
+    function apply(path, output) {
         if (!path || applying) return
         applying = true
         current = path
-        applyProc.command = ["sh", "-c",
-            root.setScript + " " + root.shellQuote(path) +
+        var setter = output
+            ? "awww img " + root.shellQuote(path) + " --outputs " + root.shellQuote(output) +
+              " --resize crop --transition-type grow --transition-duration 0.5 --transition-fps 60 --transition-pos top-right"
+            : root.setScript + " " + root.shellQuote(path)
+        applyProc.command = ["sh", "-c", setter +
             " && printf '%s' " + root.shellQuote(path) + " > " + root.currentPath]
         applyProc.running = true
+        if (deriveAccent) deriveFrom(path)
+    }
+
+    function setDeriveAccent(enabled) {
+        deriveAccent = enabled
+        if (enabled) {
+            if (current) deriveFrom(current)
+        } else {
+            saveAccent("")
+        }
+    }
+
+    function deriveFrom(path) {
+        accentProc.command = ["sh", "-c", "magick " + root.shellQuote(path) +
+            " -resize 64x64 -colors 8 -format %c histogram:info:-"]
+        accentProc.running = true
+    }
+
+    function saveAccent(hex) {
+        accentOverride = hex
+        Quickshell.execDetached(["sh", "-c", "mkdir -p $HOME/.cache/quickshell && printf '%s' '" +
+            hex + "' > " + root.accentPath])
+    }
+
+    // Picks the most colorful histogram entry, weighted by how much of the
+    // image it covers, then lifts it to a lightness that stays readable on
+    // the island and under dark on-accent text.
+    function pickAccent(histogram) {
+        var best = null
+        var bestScore = 0
+        var lines = histogram.split("\n")
+        for (var i = 0; i < lines.length; i++) {
+            var match = lines[i].match(/^\s*(\d+):.*#([0-9A-Fa-f]{6})/)
+            if (!match) continue
+            var c = Qt.color("#" + match[2])
+            var score = c.hslSaturation * Math.sqrt(parseInt(match[1], 10))
+            if (c.hslLightness < 0.15 || c.hslLightness > 0.92) score *= 0.2
+            if (score > bestScore) {
+                bestScore = score
+                best = c
+            }
+        }
+        if (!best || best.hslSaturation < 0.12) return ""
+        return Qt.hsla(best.hslHue, Math.max(0.45, Math.min(0.85, best.hslSaturation)), 0.78, 1).toString()
+    }
+
+    Process {
+        id: accentProc
+        stdout: StdioCollector {
+            onStreamFinished: root.saveAccent(root.pickAccent(this.text))
+        }
+    }
+
+    function identify(path) {
+        selectedDimensions = ""
+        if (!path) return
+        identifyProc.running = false
+        identifyProc.command = ["magick", "identify", "-format", "%w × %h", path + "[0]"]
+        identifyProc.running = true
+    }
+
+    Process {
+        id: identifyProc
+        stdout: StdioCollector {
+            onStreamFinished: root.selectedDimensions = this.text.trim()
+        }
+    }
+
+    Process {
+        id: loadAccentProc
+        command: ["sh", "-c", "cat " + root.accentPath + " 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.accentOverride = this.text.trim()
+                root.deriveAccent = root.accentOverride !== ""
+            }
+        }
     }
 
     Process {
@@ -98,6 +186,7 @@ Singleton {
 
     Component.onCompleted: {
         loadCurrentProc.running = true
+        loadAccentProc.running = true
         refresh()
     }
 }

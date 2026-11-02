@@ -13,6 +13,12 @@ Singleton {
     property var sinks: []
     property var sources: []
 
+    // PipeWire descriptions read "Steinberg UR22C Direct Steinberg UR22C"
+    function deviceLabel(description) {
+        var match = String(description || "").match(/^(.+?) (\S+) \1$/)
+        return match ? { name: match[1], detail: match[2] } : { name: description || "", detail: "" }
+    }
+
     function refreshDevices() {
         devicesProcess.running = false
         devicesProcess.running = true
@@ -21,6 +27,16 @@ Singleton {
     function setOutputVolume(volume) {
         commandProcess.command = ["pamixer", "--set-volume", Math.round(volume).toString()]
         commandProcess.running = true
+    }
+
+    // Fire-and-forget rather than commandProcess: scrolling steps faster than
+    // pamixer exits, and a busy Process would drop the later steps.
+    function stepOutputVolume(delta) {
+        var volume = Math.max(0, Math.min(100, outputVolume + delta))
+        outputVolume = volume
+        Quickshell.execDetached(["pamixer", "-u", "--set-volume", volume.toString()])
+        updateTimer.restart()
+        return volume
     }
 
     function setInputVolume(volume) {

@@ -10,6 +10,7 @@ Singleton {
     property var notifications: []
     property var readIds: ({})
     property var liveRefs: ({})
+    property var receivedAt: ({})
 
     readonly property int maxPopups: 5
 
@@ -68,6 +69,52 @@ Singleton {
 
     function togglePause() { paused = !paused }
 
+    // The server has no timestamps of its own, so arrival time is recorded here.
+    // Notifications kept across a reload have none and just read as "earlier".
+    function ageLabel(notification) {
+        return ageSince(notification ? receivedAt[notification.id] : 0)
+    }
+
+    function ageSince(at) {
+        if (!at) return "earlier"
+        var minutes = Math.floor((Date.now() - at) / 60000)
+        if (minutes < 1) return "now"
+        if (minutes < 60) return minutes + "m"
+        if (minutes < 1440) return Math.floor(minutes / 60) + "h"
+        return Math.floor(minutes / 1440) + "d"
+    }
+
+    function plainText(markup) {
+        return String(markup || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()
+    }
+
+    // Tracked notifications collapsed per app, newest first
+    function groups() {
+        var result = []
+        var byApp = {}
+        for (var i = 0; i < notifications.length; i++) {
+            var n = notifications[i]
+            var app = n.appName || "unknown"
+            if (byApp[app] === undefined) {
+                byApp[app] = result.length
+                result.push({ app: app, items: [] })
+            }
+            result[byApp[app]].items.push(n)
+        }
+        return result
+    }
+
+    function invokeDefault(notification) {
+        if (!notification) return
+        var actions = notification.actions || []
+        for (var i = 0; i < actions.length; i++) {
+            if (actions[i].identifier === "default") {
+                actions[i].invoke()
+                return
+            }
+        }
+    }
+
     NotificationServer {
         id: notifServer
         bodySupported: true
@@ -78,6 +125,11 @@ Singleton {
 
         onNotification: notif => {
             if (!notif.transient) notif.tracked = true
+            if (!notif.lastGeneration) {
+                var stamped = Object.assign({}, receivedAt)
+                stamped[notif.id] = Date.now()
+                receivedAt = stamped
+            }
 
             if (!paused && !notif.lastGeneration) {
                 // Remove duplicate id if present

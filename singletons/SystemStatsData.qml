@@ -3,201 +3,98 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
+// One sampler for everything graphed, so all histories cover the same window
 Singleton {
+    id: root
+
+    readonly property int sampleMs: 3000
+    readonly property int windowSeconds: 60
+    readonly property int windowSamples: windowSeconds * 1000 / sampleMs
+
     property int cpuUsage: 0
     property int memoryUsage: 0
     property int gpuUsage: 0
-    property string networkSpeedDown: "0b/s"
-    property string networkSpeedUp: "0b/s"
-    property real networkBitsPerSecDown: 0
-    property real networkBitsPerSecUp: 0
+    property string networkSpeedDown: "0 B/s"
+    property string networkSpeedUp: "0 B/s"
     property int cpuTemp: 0
     property int gpuTemp: 0
     property int nvmeTemp: 0
 
-    function formatSpeed(bits) {
-        if (bits >= 1000000000) {
-            return (bits / 1000000000).toFixed(1) + "Gb/s"
-        } else if (bits >= 1000000) {
-            return (bits / 1000000).toFixed(1) + "Mb/s"
-        } else if (bits >= 1000) {
-            return (bits / 1000).toFixed(1) + "Kb/s"
-        } else {
-            return Math.round(bits) + "b/s"
-        }
-    }
-
-    // History arrays (last 60 samples)
     property var cpuHistory: []
     property var memoryHistory: []
     property var gpuHistory: []
-    property var networkHistoryDown: []
-    property var networkHistoryUp: []
 
-    function addToHistory(array, value, maxLength) {
-        var newArray = array.slice()
-        newArray.push(value)
-        if (newArray.length > maxLength) {
-            newArray.shift()
-        }
-        return newArray
+    property real lastCpuTotal: 0
+    property real lastCpuIdle: 0
+    property real lastRx: -1
+    property real lastTx: -1
+    property real lastNetAt: 0
+
+    function formatRate(bytesPerSecond) {
+        if (bytesPerSecond >= 1048576) return (bytesPerSecond / 1048576).toFixed(1) + " MB/s"
+        if (bytesPerSecond >= 1024) return Math.round(bytesPerSecond / 1024) + " KB/s"
+        return Math.round(bytesPerSecond) + " B/s"
     }
 
-    // CPU Usage
+    function addToHistory(array, value) {
+        return array.concat([value]).slice(-windowSamples)
+    }
+
     Process {
-        id: cpuProcess
-        running: true
-        command: ["sh", "-c", "top -bn2 -d 0.5 | grep 'Cpu(s)' | tail -1 | awk '{print int($2)}'"]
-
-        stdout: SplitParser {
-            onRead: data => {
-                cpuUsage = parseInt(data) || 0
-                cpuHistory = addToHistory(cpuHistory, cpuUsage, 60)
-            }
-        }
-    }
-
-    Timer {
-        interval: 10000  // Update every 10 seconds
-        running: true
-        repeat: true
-        onTriggered: {
-            cpuProcess.running = false
-            cpuProcess.running = true
-        }
-    }
-
-    // Memory Usage
-    Process {
-        id: memoryProcess
-        running: true
-        command: ["sh", "-c", "free | grep Mem | awk '{print int($3/$2 * 100)}'"]
-
-        stdout: SplitParser {
-            onRead: data => {
-                memoryUsage = parseInt(data) || 0
-                memoryHistory = addToHistory(memoryHistory, memoryUsage, 60)
-            }
-        }
-    }
-
-    Timer {
-        interval: 30000  // Update every 30 seconds
-        running: true
-        repeat: true
-        onTriggered: {
-            memoryProcess.running = false
-            memoryProcess.running = true
-        }
-    }
-
-    // GPU Usage
-    Process {
-        id: gpuProcess
+        id: sampleProcess
         running: true
         command: ["sh", "-c", `
-            # Try to read GPU usage from amdgpu sysfs
-            if [ -f /sys/class/drm/card0/device/gpu_busy_percent ]; then
-                cat /sys/class/drm/card0/device/gpu_busy_percent
-            else
-                # Fallback: estimate from sensors power usage (rough approximation)
-                # Max power is 170W based on your GPU
-                POWER=$(sensors amdgpu-pci-0c00 2>/dev/null | grep PPT | awk '{print int(\$2)}')
-                if [ -n "\$POWER" ]; then
-                    echo \$(( POWER * 100 / 170 ))
-                else
-                    echo 0
-                fi
-            fi
+            read -r _ user nice system idle iowait irq softirq steal _ < /proc/stat
+            echo "CPU:$((user + nice + system + idle + iowait + irq + softirq + steal)):$((idle + iowait))"
+            free | awk '/^Mem:/{print "MEM:" int($3 / $2 * 100)}'
+            echo "GPU:$(cat /sys/class/drm/card*/device/gpu_busy_percent 2>/dev/null | head -1)"
+            IFACE=$(ip route show default | awk 'NR==1{print $5}')
+            [ -n "$IFACE" ] && echo "NET:$(cat /sys/class/net/$IFACE/statistics/rx_bytes):$(cat /sys/class/net/$IFACE/statistics/tx_bytes)"
         `]
 
         stdout: SplitParser {
-            onRead: data => {
-                gpuUsage = parseInt(data) || 0
-                gpuHistory = addToHistory(gpuHistory, gpuUsage, 60)
-            }
-        }
-    }
-
-    Timer {
-        interval: 5000  // Update every 5 seconds
-        running: true
-        repeat: true
-        onTriggered: {
-            gpuProcess.running = false
-            gpuProcess.running = true
-        }
-    }
-
-    // Network Speed (RX and TX)
-    Process {
-        id: networkProcess
-        running: true
-        command: ["sh", "-c", `
-            PREV_FILE="/tmp/quickshell_net_prev"
-            CURRENT_RX=$(cat /sys/class/net/enp6s0/statistics/rx_bytes)
-            CURRENT_TX=$(cat /sys/class/net/enp6s0/statistics/tx_bytes)
-
-            if [ -f "$PREV_FILE" ]; then
-                PREV_RX=$(head -1 "$PREV_FILE")
-                PREV_TX=$(tail -1 "$PREV_FILE")
-
-                RX_DIFF=$((CURRENT_RX - PREV_RX))
-                TX_DIFF=$((CURRENT_TX - PREV_TX))
-
-                RX_BYTES_PER_SEC=$((RX_DIFF / 5))
-                TX_BYTES_PER_SEC=$((TX_DIFF / 5))
-
-                RX_BITS=$((RX_BYTES_PER_SEC * 8))
-                TX_BITS=$((TX_BYTES_PER_SEC * 8))
-
-                echo "RX:$RX_BITS"
-                echo "TX:$TX_BITS"
-            else
-                echo "RX:0"
-                echo "TX:0"
-            fi
-
-            echo "$CURRENT_RX" > "$PREV_FILE"
-            echo "$CURRENT_TX" >> "$PREV_FILE"
-        `]
-
-        stdout: SplitParser {
-            onRead: data => {
-                var trimmed = data.trim()
-
-                // Parse RX bits
-                if (trimmed.startsWith("RX:")) {
-                    var rxNum = parseFloat(trimmed.substring(3))
-                    if (!isNaN(rxNum)) {
-                        networkBitsPerSecDown = rxNum
-                        networkSpeedDown = formatSpeed(rxNum)
-                        networkHistoryDown = addToHistory(networkHistoryDown, rxNum / 1000000, 60)
+            onRead: line => {
+                var parts = line.trim().split(":")
+                if (parts[0] === "CPU") {
+                    var total = parseFloat(parts[1])
+                    var idle = parseFloat(parts[2])
+                    if (root.lastCpuTotal > 0 && total > root.lastCpuTotal) {
+                        var busy = 1 - (idle - root.lastCpuIdle) / (total - root.lastCpuTotal)
+                        root.cpuUsage = Math.round(busy * 100)
+                        root.cpuHistory = root.addToHistory(root.cpuHistory, root.cpuUsage)
                     }
-
-                    return
-                }
-
-                // Parse TX bits
-                if (trimmed.startsWith("TX:")) {
-                    var txNum = parseFloat(trimmed.substring(3))
-                    if (!isNaN(txNum)) {
-                        networkBitsPerSecUp = txNum
-                        networkSpeedUp = formatSpeed(txNum)
-                        networkHistoryUp = addToHistory(networkHistoryUp, txNum / 1000000, 60)
+                    root.lastCpuTotal = total
+                    root.lastCpuIdle = idle
+                } else if (parts[0] === "MEM") {
+                    root.memoryUsage = parseInt(parts[1], 10) || 0
+                    root.memoryHistory = root.addToHistory(root.memoryHistory, root.memoryUsage)
+                } else if (parts[0] === "GPU") {
+                    root.gpuUsage = parseInt(parts[1], 10) || 0
+                    root.gpuHistory = root.addToHistory(root.gpuHistory, root.gpuUsage)
+                } else if (parts[0] === "NET") {
+                    var rx = parseFloat(parts[1])
+                    var tx = parseFloat(parts[2])
+                    var now = Date.now()
+                    if (root.lastRx >= 0 && rx >= root.lastRx && tx >= root.lastTx) {
+                        var seconds = (now - root.lastNetAt) / 1000
+                        root.networkSpeedDown = root.formatRate((rx - root.lastRx) / seconds)
+                        root.networkSpeedUp = root.formatRate((tx - root.lastTx) / seconds)
                     }
+                    root.lastRx = rx
+                    root.lastTx = tx
+                    root.lastNetAt = now
                 }
             }
         }
     }
 
     Timer {
-        interval: 5000  // Update every 5 seconds
+        interval: root.sampleMs
         running: true
         repeat: true
         onTriggered: {
-            networkProcess.running = false
-            networkProcess.running = true
+            sampleProcess.running = false
+            sampleProcess.running = true
         }
     }
 

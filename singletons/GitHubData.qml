@@ -4,7 +4,8 @@ import Quickshell
 import Quickshell.Io
 
 Singleton {
-    property int notificationCount: 0
+    id: root
+
     property var notifications: []
 
     function refresh() {
@@ -12,11 +13,22 @@ Singleton {
         notificationProcess.running = true
     }
 
-    // Fetch notifications using GitHub CLI
+    // "PullRequest" -> "pull request"
+    function typeLabel(type) {
+        return String(type || "").replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase()
+    }
+
+    function typeIcon(type) {
+        if (type === "PullRequest") return "git-pull-request"
+        if (type === "Issue") return "issue"
+        return "github"
+    }
+
+    // Threads without a page of their own, such as CI runs, open the repository
     Process {
         id: notificationProcess
         running: true
-        command: ["sh", "-c", "gh api notifications --jq '.[] | {id: .id, title: .subject.title, type: .subject.type, repo: .repository.full_name, unread: .unread, updated_at: .updated_at, url: (.subject.url | sub(\"api.github.com/repos/\"; \"github.com/\") | sub(\"/pulls/\"; \"/pull/\"))}' 2>/dev/null | jq -s -c '.'"]
+        command: ["sh", "-c", "gh api notifications --jq '.[] | {id: .id, title: .subject.title, type: .subject.type, repo: .repository.full_name, unread: .unread, updated_at: .updated_at, url: ((.subject.url // .repository.url) | sub(\"api.github.com/repos/\"; \"github.com/\") | sub(\"/pulls/\"; \"/pull/\"))}' 2>/dev/null | jq -s -c '.'"]
 
         stdout: SplitParser {
             onRead: data => {
@@ -24,9 +36,7 @@ Singleton {
                 if (trimmed.length === 0) return
 
                 try {
-                    var parsed = JSON.parse(trimmed)
-                    notifications = parsed
-                    notificationCount = parsed.filter(n => n.unread).length
+                    root.notifications = JSON.parse(trimmed)
                 } catch (e) {
                     // Ignore parse errors for empty or partial output
                 }

@@ -8,6 +8,11 @@ Singleton {
     property string distroVersion: ""
     property string kernel: ""
     property string uptime: ""
+    // "3 days, 14 hours, 9 minutes" -> "3d 14h"
+    readonly property string uptimeShort: {
+        var parts = uptime.split(",").map(p => p.trim())
+        return parts.slice(0, 2).map(p => p.replace(/^(\d+) (\w).*$/, "$1$2")).join(" ")
+    }
     property string de: "Hyprland"
 
     function refresh() {

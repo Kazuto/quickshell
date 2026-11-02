@@ -2,130 +2,111 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
+import Quickshell.Io
 
 Singleton {
-    // Last clicked module's center X position (screen coords)
+    // Where the older, non-island overlays open: centered under the island of
+    // this screen. lastClickX/screenWidth are what they position themselves by.
     property int lastClickX: 0
-    // Primary screen width — set by Main.qml on startup
     property int screenWidth: 1920
+    property var overlayScreen: null
 
-    property bool spotifyOverlayVisible: false
-    property bool bluetoothOverlayVisible: false
-    property bool audioOverlayVisible: false
-    property bool wifiOverlayVisible: false
-    property bool vpnOverlayVisible: false
-    property bool logitechOverlayVisible: false
-    property bool notificationsOverlayVisible: false
-    property bool systemStatsOverlayVisible: false
-    property bool githubOverlayVisible: false
-    property bool timerOverlayVisible: false
+    // Panel grown out of the island, "" when closed. One at a time: opening
+    // another morphs the same outline instead of stacking.
+    property string islandPanel: ""
+    property string islandPanelOutput: ""
+
+    // Panels that take over the screen: wider, dimmed behind, opened by keybind
+    readonly property var keybindPanels: ["launcher", "emoji", "quick", "hotkeys", "wallpaper", "clipboard"]
+    readonly property bool islandPanelDims: keybindPanels.indexOf(islandPanel) >= 0
+
+    // Hyprland.focusedMonitor stays null on this build, but workspaces know both
+    readonly property string focusedOutput: {
+        var list = Hyprland.workspaces.values
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].focused && list[i].monitor) return list[i].monitor.name
+        }
+        return ""
+    }
+
+    // Hyprland's description per output name. Qt reports no serial and two of the
+    // monitors are the same model, so only hyprctl can tell them apart.
+    property var outputDescriptions: ({})
+
+    Process {
+        id: monitorsProcess
+        running: true
+        command: ["hyprctl", "monitors", "-j"]
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const map = {}
+                    for (const m of JSON.parse(this.text)) map[m.name] = m.description
+                    outputDescriptions = map
+                } catch (e) {
+                    console.warn("Failed to parse hyprctl monitors output:", e)
+                }
+            }
+        }
+    }
+
+    Connections {
+        target: Quickshell
+        function onScreensChanged() {
+            monitorsProcess.running = false
+            monitorsProcess.running = true
+        }
+    }
+
+    onFocusedOutputChanged: {
+        if (islandPanel !== "" && focusedOutput !== "" && focusedOutput !== islandPanelOutput)
+            closePanel()
+    }
+
+    function openPanel(name, output) {
+        closeOlderOverlays()
+        islandPanelOutput = output || focusedOutput
+        islandPanel = name
+    }
+
+    function togglePanel(name, output) {
+        if (islandPanel === name) closePanel()
+        else openPanel(name, output)
+    }
+
+    function closePanel() {
+        islandPanel = ""
+    }
+
+    function focusedScreen() {
+        for (var i = 0; i < Quickshell.screens.length; i++) {
+            if (Quickshell.screens[i].name === focusedOutput) return Quickshell.screens[i]
+        }
+        return Quickshell.screens[0] || null
+    }
+
+    function centerOverlaysOn(screen) {
+        if (!screen) return
+        overlayScreen = screen
+        screenWidth = screen.width
+        lastClickX = screen.width / 2
+    }
+
     property bool ollamaOverlayVisible: false
-    property bool calendarOverlayVisible: false
-    property bool menuOverlayVisible: false
-    property bool screenRecorderOverlayVisible: false
-    property bool powerOverlayVisible: false
-    property bool batteryOverlayVisible: false
-    property bool launcherOverlayVisible: false
-    property bool emojiPickerOverlayVisible: false
-    property bool wallpaperPickerOverlayVisible: false
     property bool trayMenuOverlayVisible: false
     // The QsMenuHandle (item.menu) of whichever tray icon was right-clicked
     property var trayMenuTarget: null
 
-    // Tray icon hover tooltip. Not part of closeAllOverlays()'s set — this
-    // is transient hover feedback, not a modal overlay, and must keep
-    // working while other overlays are open.
-    property bool trayTooltipVisible: false
-    property string trayTooltipText: ""
-    property real trayTooltipX: 0
-
-    property bool isRecording: false
-
     function closeAllOverlays() {
-        spotifyOverlayVisible = false
-        bluetoothOverlayVisible = false
-        audioOverlayVisible = false
-        wifiOverlayVisible = false
-        vpnOverlayVisible = false
-        logitechOverlayVisible = false
-        notificationsOverlayVisible = false
-        systemStatsOverlayVisible = false
-        githubOverlayVisible = false
-        timerOverlayVisible = false
+        islandPanel = ""
+        closeOlderOverlays()
+    }
+
+    function closeOlderOverlays() {
         ollamaOverlayVisible = false
-        calendarOverlayVisible = false
-        menuOverlayVisible = false
-        screenRecorderOverlayVisible = false
-        powerOverlayVisible = false
-        batteryOverlayVisible = false
-        launcherOverlayVisible = false
-        emojiPickerOverlayVisible = false
-        wallpaperPickerOverlayVisible = false
         trayMenuOverlayVisible = false
-    }
-
-    function toggleSpotifyOverlay() {
-        if (!spotifyOverlayVisible) {
-            closeAllOverlays()
-        }
-        spotifyOverlayVisible = !spotifyOverlayVisible
-    }
-
-    function toggleBluetoothOverlay() {
-        if (!bluetoothOverlayVisible) {
-            closeAllOverlays()
-        }
-        bluetoothOverlayVisible = !bluetoothOverlayVisible
-    }
-
-    function toggleAudioOverlay() {
-        if (!audioOverlayVisible) {
-            closeAllOverlays()
-        }
-        audioOverlayVisible = !audioOverlayVisible
-    }
-
-    function toggleWifiOverlay() {
-        if (!wifiOverlayVisible) closeAllOverlays()
-        wifiOverlayVisible = !wifiOverlayVisible
-    }
-
-    function toggleVpnOverlay() {
-        if (!vpnOverlayVisible) closeAllOverlays()
-        vpnOverlayVisible = !vpnOverlayVisible
-    }
-
-    function toggleLogitechOverlay() {
-        if (!logitechOverlayVisible) closeAllOverlays()
-        logitechOverlayVisible = !logitechOverlayVisible
-    }
-
-    function toggleNotificationsOverlay() {
-        if (!notificationsOverlayVisible) {
-            closeAllOverlays()
-        }
-        notificationsOverlayVisible = !notificationsOverlayVisible
-    }
-
-    function toggleSystemStatsOverlay() {
-        if (!systemStatsOverlayVisible) {
-            closeAllOverlays()
-        }
-        systemStatsOverlayVisible = !systemStatsOverlayVisible
-    }
-
-    function toggleGitHubOverlay() {
-        if (!githubOverlayVisible) {
-            closeAllOverlays()
-        }
-        githubOverlayVisible = !githubOverlayVisible
-    }
-
-    function toggleTimerOverlay() {
-        if (!timerOverlayVisible) {
-            closeAllOverlays()
-        }
-        timerOverlayVisible = !timerOverlayVisible
     }
 
     function toggleOllamaOverlay() {
@@ -133,62 +114,6 @@ Singleton {
             closeAllOverlays()
         }
         ollamaOverlayVisible = !ollamaOverlayVisible
-    }
-
-    function toggleCalendarOverlay() {
-        if (!calendarOverlayVisible) {
-            closeAllOverlays()
-        }
-        calendarOverlayVisible = !calendarOverlayVisible
-    }
-
-    function toggleMenuOverlay() {
-        if (!menuOverlayVisible) {
-            closeAllOverlays()
-        }
-        menuOverlayVisible = !menuOverlayVisible
-    }
-
-    function toggleScreenRecorderOverlay() {
-        if (!screenRecorderOverlayVisible) {
-            closeAllOverlays()
-        }
-        screenRecorderOverlayVisible = !screenRecorderOverlayVisible
-    }
-
-    function togglePowerOverlay() {
-        if (!powerOverlayVisible) {
-            closeAllOverlays()
-        }
-        powerOverlayVisible = !powerOverlayVisible
-    }
-
-    function toggleBatteryOverlay() {
-        if (!batteryOverlayVisible) {
-            closeAllOverlays()
-        }
-        batteryOverlayVisible = !batteryOverlayVisible
-    }
-
-    function toggleLauncherOverlay() {
-        if (!launcherOverlayVisible) {
-            closeAllOverlays()
-        }
-        launcherOverlayVisible = !launcherOverlayVisible
-    }
-
-    function toggleEmojiPickerOverlay() {
-        if (!emojiPickerOverlayVisible) {
-            closeAllOverlays()
-        }
-        emojiPickerOverlayVisible = !emojiPickerOverlayVisible
-    }
-
-    function toggleWallpaperPickerOverlay() {
-        if (!wallpaperPickerOverlayVisible) {
-            closeAllOverlays()
-        }
-        wallpaperPickerOverlayVisible = !wallpaperPickerOverlayVisible
     }
 
     function openTrayMenu(menu) {
@@ -200,15 +125,5 @@ Singleton {
     function closeTrayMenu() {
         trayMenuOverlayVisible = false
         trayMenuTarget = null
-    }
-
-    function showTrayTooltip(text, x) {
-        trayTooltipText = text
-        trayTooltipX = x
-        trayTooltipVisible = true
-    }
-
-    function hideTrayTooltip() {
-        trayTooltipVisible = false
     }
 }

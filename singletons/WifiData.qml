@@ -5,12 +5,21 @@ import Quickshell.Io
 
 Singleton {
     property bool enabled: false
+    property bool wiredConnected: false
     property string connectedSsid: ""
     property int connectedSignal: 0
     property var networks: []
     property bool scanning: false
     property var pendingCommand: []
     property var savedSsids: []   // SSIDs with a saved connection profile
+
+    // "WPA1 WPA2" -> "WPA2", "WPA2 WPA3" -> "WPA2/3", "" -> "open"
+    function securityLabel(security) {
+        var value = String(security || "").trim()
+        if (value === "") return "open"
+        if (value.indexOf("WPA2") >= 0 && value.indexOf("WPA3") >= 0) return "WPA2/3"
+        return value.split(/\s+/).pop()
+    }
 
     function refresh() {
         statusProcess.running = false
@@ -68,6 +77,7 @@ Singleton {
         command: ["sh", "-c", `
             RADIO=$(nmcli radio wifi)
             echo "RADIO:$RADIO"
+            nmcli -t -f TYPE,STATE device 2>/dev/null | grep -q '^ethernet:connected$' && echo "WIRED:1" || echo "WIRED:0"
             nmcli -t -f active,ssid,signal dev wifi list 2>/dev/null | grep "^yes" | while IFS=: read active ssid signal; do
                 echo "CONNECTED:$ssid:$signal"
             done
@@ -76,6 +86,7 @@ Singleton {
         stdout: SplitParser {
             onRead: data => {
                 if (data.startsWith("RADIO:")) { enabled = data.substring(6).trim() === "enabled"; return }
+                if (data.startsWith("WIRED:")) { wiredConnected = data.substring(6).trim() === "1"; return }
 
                 if (data.startsWith("CONNECTED:")) {
                     var parts = data.substring(10).split(":")

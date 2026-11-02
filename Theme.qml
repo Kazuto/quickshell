@@ -2,38 +2,57 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import "root:/singletons"
 
 Singleton {
-    // Catppuccin Mocha color palette
-    property color base: "#1e1e2e"
-    property color mantle: "#181825"
-    property color crust: "#11111b"
+    // Island v1 tokens
+    property color desk: "#0b0c12"
+    property color island: "#0f1017"
+    property color surfaceLow: "#1a1c27"
+    property color surfaceHigh: "#242737"
+    property color surfaceTop: "#33364a"
+    property color text: "#e6e8f2"
+    property color textDim: "#a0a6bd"
+    property color textFaint: "#5f6479"
+    property color stroke: Qt.rgba(1, 1, 1, 0.08)
+    property color textOnAccent: "#0f1017"
 
-    property color surface0: "#313244"
-    property color surface1: "#45475a"
-    property color surface2: "#585b70"
+    readonly property color sakura: "#f2a7bd"
+    // Follows the wallpaper when "Derive accent from wallpaper" is on
+    property color accent: WallpaperData.accentOverride !== "" ? WallpaperData.accentOverride : sakura
+    property color accentSky: "#a8c5ee"
+    property color rec: "#ff7b86"
+    property color warn: "#f5c27a"
 
-    property color overlay0: "#6c7086"
-    property color overlay1: "#7f849c"
-    property color overlay2: "#9399b2"
+    // Palette names the older overlays still read, mapped onto the tokens above
+    property color base: island
+    property color mantle: desk
+    property color crust: desk
 
-    property color text: "#cdd6f4"
-    property color subtext1: "#bac2de"
-    property color subtext0: "#a6adc8"
+    property color surface0: surfaceLow
+    property color surface1: surfaceHigh
+    property color surface2: surfaceTop
+
+    property color overlay0: textFaint
+    property color overlay1: "#7d8298"
+    property color overlay2: "#8f95ab"
+
+    property color subtext1: "#c3c7d9"
+    property color subtext0: textDim
 
     // Accent colors
-    property color rosewater: "#f5e0dc"
-    property color flamingo: "#f2cdcd"
-    property color pink: "#f5c2e7"
-    property color mauve: "#cba6f7"
-    property color red: "#f38ba8"
-    property color maroon: "#eba0ac"
-    property color peach: "#fab387"
-    property color yellow: "#f9e2af"
-    property color green: "#a6e3a1"
-    property color teal: "#94e2d5"
-    property color sky: "#89dceb"
-    property color sapphire: "#74c7ec"
-    property color blue: "#89b4fa"
-    property color lavender: "#b4befe"
+    property color rosewater: accent
+    property color flamingo: accent
+    property color pink: accent
+    property color mauve: accent
+    property color red: rec
+    property color maroon: rec
+    property color peach: accent
+    property color yellow: warn
+    property color green: "#a9dcb4"
+    property color teal: accentSky
+    property color sky: accentSky
+    property color sapphire: accentSky
+    property color blue: accentSky
+    property color lavender: accentSky
 }
