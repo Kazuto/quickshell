@@ -93,15 +93,15 @@ Singleton {
     }
 
     readonly property var dataFiles: [
-        "/usr/lib/python3/dist-packages/picker/data/emojis_smileys_emotion.csv",
-        "/usr/lib/python3/dist-packages/picker/data/emojis_people_body.csv",
-        "/usr/lib/python3/dist-packages/picker/data/emojis_animals_nature.csv",
-        "/usr/lib/python3/dist-packages/picker/data/emojis_food_drink.csv",
-        "/usr/lib/python3/dist-packages/picker/data/emojis_travel_places.csv",
-        "/usr/lib/python3/dist-packages/picker/data/emojis_activities.csv",
-        "/usr/lib/python3/dist-packages/picker/data/emojis_objects.csv",
-        "/usr/lib/python3/dist-packages/picker/data/emojis_symbols.csv",
-        "/usr/lib/python3/dist-packages/picker/data/emojis_flags.csv"
+        "smileys_emotion",
+        "people_body",
+        "animals_nature",
+        "food_drink",
+        "travel_places",
+        "activities",
+        "objects",
+        "symbols",
+        "flags"
     ]
 
     function parseLine(line) {
@@ -124,7 +124,18 @@ Singleton {
 
     Process {
         id: loadProc
-        command: ["sh", "-c", 'for f in "$@"; do echo "#FILE:$f"; cat "$f"; done', "sh"].concat(root.dataFiles)
+        // rofimoji's data: dist-packages on Debian and Ubuntu, a versioned
+        // site-packages directory on Arch
+        command: ["sh", "-c", `
+            for dir in /usr/lib/python3/dist-packages/picker/data /usr/lib/python3*/site-packages/picker/data; do
+                [ -d "$dir" ] || continue
+                for name in "$@"; do
+                    echo "#FILE:$name"
+                    cat "$dir/emojis_$name.csv"
+                done
+                break
+            done
+        `, "sh"].concat(root.dataFiles)
         stdout: SplitParser {
             property var incoming: []
             property string category: "other"
