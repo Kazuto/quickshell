@@ -1,0 +1,25 @@
+module components
+
+SvgIcon 1.0 SvgIcon.qml
+GhostButton 1.0 GhostButton.qml
+BlinkCursor 1.0 BlinkCursor.qml
+IslandLabel 1.0 IslandLabel.qml
+KeyChip 1.0 KeyChip.qml
+IslandButton 1.0 IslandButton.qml
+SegmentedControl 1.0 SegmentedControl.qml
+BarSlider 1.0 BarSlider.qml
+CheckBox 1.0 CheckBox.qml
+IconDisc 1.0 IconDisc.qml
+RoundedImage 1.0 RoundedImage.qml
+EqBars 1.0 EqBars.qml
+TimerRing 1.0 TimerRing.qml
+HintRow 1.0 HintRow.qml
+SearchField 1.0 SearchField.qml
+PanelFrame 1.0 PanelFrame.qml
+IslandSurface 1.0 IslandSurface.qml
+WorkspaceDots 1.0 WorkspaceDots.qml
+DetailCard 1.0 DetailCard.qml
+Sparkline 1.0 Sparkline.qml
+FilterChip 1.0 FilterChip.qml
+IslandSwitch 1.0 IslandSwitch.qml
+MiniStat 1.0 MiniStat.qml
