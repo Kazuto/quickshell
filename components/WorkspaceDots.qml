@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell.Hyprland
 import "root:/"
+import "root:/singletons"
 
 // One dot per workspace on this output: a pill for the active one, brighter
 // dots where windows are open. Scrolling steps through them.
@@ -31,7 +32,7 @@ Row {
             if (ws && ws.active) current = i
         }
         var next = Math.max(0, Math.min(slots.length - 1, current + delta))
-        if (next !== current) Hyprland.dispatch("workspace " + slots[next])
+        if (next !== current) HyprlandData.focusWorkspace(slots[next])
     }
 
     Repeater {
@@ -78,7 +79,7 @@ Row {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: Hyprland.dispatch("workspace " + cell.modelData)
+                onClicked: HyprlandData.focusWorkspace(cell.modelData)
                 onWheel: wheel => root.step(wheel.angleDelta.y > 0 ? -1 : 1)
             }
         }

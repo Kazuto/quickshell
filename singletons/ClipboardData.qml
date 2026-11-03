@@ -4,8 +4,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// History comes from cliphist, fed by `wl-paste --watch cliphist store` in
-// hyprland.conf. Entries are "<id>\t<preview>".
+// History comes from cliphist, fed by `wl-paste --watch cliphist store` in the
+// Hyprland config. Entries are "<id>\t<preview>".
 Singleton {
     id: root
 

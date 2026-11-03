@@ -4,7 +4,7 @@ import "root:/singletons"
 import "root:/components"
 import "root:/js/KeyNav.js" as KeyNav
 
-// K4: read from hyprland.conf, so it can't drift from what the keys really do
+// K4: read from the Hyprland config, so it can't drift from what the keys really do
 PanelFrame {
     id: panel
 
@@ -67,7 +67,7 @@ PanelFrame {
             anchors.verticalCenter: parent.verticalCenter
         },
         IslandLabel {
-            text: panel.filterText !== "" ? panel.filterText : "read from hyprland.conf"
+            text: panel.filterText !== "" ? panel.filterText : "read from " + HyprlandData.configFile
             kind: "meta"
             color: panel.filterText !== "" ? Theme.text : Theme.textDim
             anchors.verticalCenter: parent.verticalCenter

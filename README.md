@@ -48,6 +48,14 @@ panel opens. It needs no root. Installing runs `scripts/run-updates.sh` in a ter
 each manager can show what it's about to do. Packages go together and firmware one device at
 a time. Tools built by hand aren't covered.
 
+## Hyprland versions
+
+Both config formats work. Hyprland 0.57 only reads `hyprland.lua`, older releases only
+`hyprland.conf`, and `hyprctl` takes different commands with each.
+`singletons/HyprlandData.qml` asks the running Hyprland which one it's using and sends the
+right form. The hotkey sheet reads that same file, so with Lua each bind has to stay on one
+line with its command inline.
+
 ## IPC
 
 Send commands to the socket at `/tmp/quickshell.sock`, for example

@@ -19,7 +19,7 @@ Singleton {
 
     FileView {
         id: configFile
-        path: Quickshell.env("HOME") + "/.config/hypr/hyprland.conf"
+        path: Quickshell.env("HOME") + "/.config/hypr/" + HyprlandData.configFile
         watchChanges: true
         onFileChanged: reload()
         onLoaded: {

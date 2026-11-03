@@ -75,7 +75,7 @@ PanelFrame {
             var cmd = row.execString.replace(/%[fFuUcCkdki%]/g, "").trim()
             if (!cmd) return
             AppUsageData.recordUsage(row.id)
-            Quickshell.execDetached(["hyprctl", "dispatch", "exec", cmd])
+            HyprlandData.exec(cmd)
         }
         AppState.closePanel()
     }

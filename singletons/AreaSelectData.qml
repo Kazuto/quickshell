@@ -31,7 +31,7 @@ Singleton {
         AppState.closePanel()
         snapshotProcess.running = true
         // Same as grimblast, so the overlay can't fade out into a capture
-        Quickshell.execDetached(["hyprctl", "keyword", "layerrule", "match:namespace ^selection$, no_anim on"])
+        Quickshell.execDetached(["sh", "-c", HyprlandData.selectionRuleCommand])
         active = true
     }
 
@@ -79,7 +79,7 @@ Singleton {
         interval: 120
         onTriggered: {
             if (root.active)
-                Quickshell.execDetached(["hyprctl", "dispatch", "movecursor", String(root.startCursor.x), String(root.startCursor.y)])
+                HyprlandData.moveCursor(root.startCursor.x, root.startCursor.y)
         }
     }
 
