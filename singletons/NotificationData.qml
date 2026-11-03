@@ -23,7 +23,9 @@ Singleton {
 
     function notifAt(index) {
         if (index < 0 || index >= popupModel.count) return null
-        return liveRefs[popupModel.get(index).nid] || null
+        var live = liveRefs[popupModel.get(index).nid]
+        // A reference outlives a notification its sender closed, and then reads as empty
+        return live && live.id ? live : null
     }
 
     function indexOfId(id) {
@@ -51,11 +53,10 @@ Singleton {
         notifications = notifServer.trackedNotifications.values.slice().reverse()
     }
 
-    function removePopup(notification) {
-        if (!notification) return
-        var idx = indexOfId(notification.id)
+    function removePopup(id) {
+        var idx = indexOfId(id)
         if (idx >= 0) popupModel.remove(idx)
-        delete liveRefs[notification.id]
+        delete liveRefs[id]
     }
 
     function clearAll() {

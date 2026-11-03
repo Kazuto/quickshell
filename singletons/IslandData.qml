@@ -56,8 +56,7 @@ Singleton {
     }
 
     function finishCurrent() {
-        var index = notification ? NotificationData.indexOfId(notification.id) : -1
-        if (index >= 0) NotificationData.removePopup(NotificationData.notifAt(index))
+        if (notification) NotificationData.removePopup(notification.id)
         notification = null
         showNext()
     }
