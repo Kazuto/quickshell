@@ -89,10 +89,10 @@ write_configs() {
     if [ -d "$flavors/catppuccin-mocha.yazi" ]; then
         mkdir -p "$flavors/accent.yazi"
         cp "$flavors/catppuccin-mocha.yazi/tmtheme.xml" "$flavors/accent.yazi/" 2>/dev/null
+        # Blue is this flavor's accent: tabs, borders, modes and folders
         sed -E \
+            -e "s/#89b4fa/$1/g" \
             -e "/^cwd /s/#[0-9a-fA-F]{6}/$1/" \
-            -e "/^normal_main /s/bg = \"#[0-9a-fA-F]{6}\"/bg = \"$1\"/" \
-            -e "/^normal_alt /s/fg = \"#[0-9a-fA-F]{6}\"/fg = \"$1\"/" \
             -e "/^hovered +=/s/fg = \"#[0-9a-fA-F]{6}\"/fg = \"$1\"/" \
             "$flavors/catppuccin-mocha.yazi/flavor.toml" > "$flavors/accent.yazi/flavor.toml"
     fi
