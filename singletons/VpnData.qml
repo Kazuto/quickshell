@@ -6,8 +6,10 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    property string connectionName: "my-vpn"
+    // NetworkManager's VPN profile, preferring one that's up. Empty if there isn't one.
+    property string connectionName: ""
     property string state: ""
+    readonly property bool available: connectionName !== ""
     readonly property bool connected: state === "activated"
     readonly property bool busy: commandPending || state === "activating" || state === "deactivating"
     readonly property bool checking: statusProcess.running
@@ -23,8 +25,21 @@ Singleton {
         statusProcess.running = true
     }
 
+    // Lines look like "yes:activated:vpn:Some name", with any ":" in the name escaped
+    function readProfiles(output) {
+        var found = null
+        var lines = output.split("\n")
+        for (var i = 0; i < lines.length; i++) {
+            var profile = lines[i].match(/^(yes|no):([^:]*):(vpn|wireguard):(.*)$/)
+            if (profile && (!found || (profile[1] === "yes" && found[1] !== "yes")))
+                found = profile
+        }
+        connectionName = found ? found[4].replace(/\\(.)/g, "$1") : ""
+        state = found ? found[2] : ""
+    }
+
     function toggle() {
-        if (busy || checking) return
+        if (!available || busy || checking) return
         error = ""
         commandPending = true
         // Capture the requested action once; never interrupt an in-flight nmcli command.
@@ -34,9 +49,9 @@ Singleton {
 
     Process {
         id: statusProcess
-        command: ["env", "LC_ALL=C", "nmcli", "-g", "GENERAL.STATE", "connection", "show", root.connectionName]
+        command: ["env", "LC_ALL=C", "nmcli", "-t", "-f", "ACTIVE,STATE,TYPE,NAME", "connection", "show"]
         stdout: StdioCollector {
-            onStreamFinished: root.state = text.trim()
+            onStreamFinished: root.readProfiles(text)
         }
         onExited: {
             if (root.refreshPending) {

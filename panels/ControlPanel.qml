@@ -118,6 +118,7 @@ PanelFrame {
         }
 
         Tile {
+            visible: VpnData.available
             iconName: "shield"
             title: "VPN"
             subtitle: VpnData.busy ? "…" : VpnData.connected ? VpnData.connectionName : "off"
