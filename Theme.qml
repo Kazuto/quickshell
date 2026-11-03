@@ -5,20 +5,20 @@ import Quickshell
 import "root:/singletons"
 
 Singleton {
-    // Island v1 tokens
-    property color desk: "#0b0c12"
-    property color island: "#0f1017"
-    property color surfaceLow: "#1a1c27"
-    property color surfaceHigh: "#242737"
-    property color surfaceTop: "#33364a"
+    // Island v1 tokens, on Catppuccin Mocha backgrounds to match the other apps
+    property color desk: "#11111b"
+    property color island: "#1e1e2e"
+    property color surfaceLow: "#313244"
+    property color surfaceHigh: "#45475a"
+    property color surfaceTop: "#585b70"
     property color text: "#e6e8f2"
     property color textDim: "#a0a6bd"
-    property color textFaint: "#5f6479"
+    property color textFaint: "#6c7086"
     property color stroke: Qt.rgba(1, 1, 1, 0.08)
-    property color textOnAccent: "#0f1017"
+    property color textOnAccent: "#11111b"
 
     readonly property color sakura: "#f2a7bd"
-    // Follows the wallpaper when "Derive accent from wallpaper" is on
+    // Follows the wallpaper unless "Derive accent from wallpaper" is off
     property color accent: WallpaperData.accentOverride !== "" ? WallpaperData.accentOverride : sakura
     property color accentSky: "#a8c5ee"
     property color rec: "#ff7b86"
@@ -26,7 +26,7 @@ Singleton {
 
     // Palette names the older overlays still read, mapped onto the tokens above
     property color base: island
-    property color mantle: desk
+    property color mantle: "#181825"
     property color crust: desk
 
     property color surface0: surfaceLow
