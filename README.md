@@ -20,8 +20,8 @@ output, with everything else morphing out of it.
 Hyprland's borders, Ghostty's cursor, Neovim, Yazi, tmux and the Starship directory.
 Backgrounds and syntax colors stay Catppuccin Mocha. It runs from `set-wallpaper.sh`,
 and "Derive accent from wallpaper" in the wallpaper picker turns it off. Generated
-files go in `~/.cache/quickshell`, apart from Yazi's flavor, which has to live in
-`~/.config/yazi/flavors`.
+files go in `~/.cache/quickshell`. Yazi uses palette color 89, which the script
+redefines in Ghostty, so open Yazi windows recolor without a restart.
 
 ## IPC
 
