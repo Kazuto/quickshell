@@ -50,20 +50,21 @@ Singleton {
                 root.record(["-o", AppState.focusedOutput])
                 return
             }
-            pickerProcess.command = ["sh", "-c", root.pendingMode === "window" ? root.windowPicker : root.areaPicker]
+            if (root.pendingMode === "area") {
+                AreaSelectData.pick(geometry => {
+                    if (geometry.length > 0) root.record(["-g", geometry])
+                })
+                return
+            }
+            pickerProcess.command = ["sh", "-c", root.windowPicker]
             pickerProcess.running = true
         }
     }
 
-    // Same as grimblast, so the overlay's fade-out doesn't end up in the recording
-    readonly property string pickerSetup: "hyprctl keyword layerrule 'match:namespace ^selection$, no_anim on' >/dev/null"
-
-    // slurp reads preset boxes from stdin until it closes, and Process leaves it open.
-    // exec means stopping this process also closes the overlay.
-    readonly property string areaPicker: root.pickerSetup + "; exec slurp -d </dev/null"
-
-    // Click a visible window: slurp -r restricts selection to the boxes on stdin
-    readonly property string windowPicker: root.pickerSetup + `
+    // Click a visible window: slurp -r restricts selection to the boxes on stdin.
+    // The rule is the same as grimblast's, so the overlay can't fade out into the recording.
+    readonly property string windowPicker: `
+        hyprctl keyword layerrule 'match:namespace ^selection$, no_anim on' >/dev/null
         ws=$(hyprctl monitors -j | jq -c '[.[].activeWorkspace.id]')
         hyprctl clients -j | jq -r --argjson ws "$ws" '.[] | select(.workspace.id as $w | $ws | index($w)) | "\\(.at[0]),\\(.at[1]) \\(.size[0])x\\(.size[1])"' | slurp -r
     `

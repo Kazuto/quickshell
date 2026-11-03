@@ -18,6 +18,8 @@ SearchField 1.0 SearchField.qml
 PanelFrame 1.0 PanelFrame.qml
 IslandSurface 1.0 IslandSurface.qml
 WorkspaceDots 1.0 WorkspaceDots.qml
+YarnBall 1.0 YarnBall.qml
+YarnStrand 1.0 YarnStrand.qml
 DetailCard 1.0 DetailCard.qml
 Sparkline 1.0 Sparkline.qml
 FilterChip 1.0 FilterChip.qml

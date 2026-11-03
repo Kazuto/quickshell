@@ -54,7 +54,8 @@ PanelFrame {
 
     function delayedShot(args) {
         // Long enough for the panel and scrim to be gone from the capture
-        Quickshell.execDetached(["sh", "-c", "sleep 0.4; grimblast --notify copy " + args])
+        var selector = Quickshell.shellDir + "/scripts/area-select"
+        Quickshell.execDetached(["sh", "-c", "sleep 0.4; PATH=" + selector + ":$PATH grimblast --notify copy " + args])
     }
 
     function run(action) {

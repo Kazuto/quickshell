@@ -1,0 +1,25 @@
+#!/bin/sh
+# Stands in for slurp when grimblast runs, which is how area screenshots get the yarn
+# selector. The area keybinds put this folder first in PATH for that one command.
+#
+# grimblast reads back "x,y wxh|id". The id stays empty so it always captures the region:
+# with an id it runs grim -T, which grim doesn't support here.
+
+socket="${QUICKSHELL_SOCKET:-/tmp/quickshell.sock}"
+boxes=$(cat)
+
+use_real_slurp() {
+    PATH=${PATH#*:}
+    printf '%s' "$boxes" | slurp "$@"
+    exit $?
+}
+
+[ -S "$socket" ] || use_real_slurp "$@"
+
+# Quickshell treats a half-closed socket as gone, so shut-none keeps it fully open once
+# the command is sent, and -t keeps socat listening for as long as selecting takes
+geometry=$(printf 'area-select\n' | socat -t 3600 - "UNIX-CONNECT:$socket,shut-none" 2>/dev/null) || use_real_slurp "$@"
+
+[ -n "$geometry" ] || exit 1
+
+printf '%s|\n' "$geometry"

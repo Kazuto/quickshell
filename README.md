@@ -30,6 +30,15 @@ which recolors Thunar and Chrome's "Use GTK" mode live. libadwaita apps read
 as a CSS mod, also at launch: turn on CSS modifications in `vivaldi://experiments` and
 set the folder under Custom UI Modifications.
 
+## Area selector
+
+Area screenshots and recordings pick their area with yarn from the screen's corners to the
+pointer. Drag to select, click for the window under the pointer or the whole screen, Esc or
+right click to cancel. `area-select` on the socket answers with `x,y wxh`, and
+`scripts/area-select/slurp` stands in for slurp so grimblast can use it: the keybinds put
+that folder first in PATH. The look is in `shaders/yarn.*`, and the compile command for the
+`.qsb` files is at the top of each shader.
+
 ## IPC
 
 Send commands to the socket at `/tmp/quickshell.sock`, for example

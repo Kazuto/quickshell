@@ -31,6 +31,12 @@ Rectangle {
         Windows.Island {}
     }
 
+    // Only exists while an area is being picked
+    Variants {
+        model: AreaSelectData.active ? Quickshell.screens : []
+        Windows.AreaSelector {}
+    }
+
     // Ollama overlay
     Overlays.OllamaOverlay {
         id: ollamaOverlay
@@ -60,9 +66,24 @@ Rectangle {
         path: Config.ipcSocketPath
 
         handler: Socket {
+            id: client
+
             parser: SplitParser {
                 onRead: msg => {
                     console.log("Received IPC command:", msg)
+
+                    // Answers with "x,y wxh", or nothing if it was cancelled
+                    if (msg === "area-select") {
+                        AreaSelectData.pick(geometry => {
+                            if (!client || !client.connected) return
+
+                            client.write(geometry + "\n")
+                            client.flush()
+                            client.connected = false
+                        })
+
+                        return
+                    }
 
                     // "<panel>-toggle" for every panel of the island
                     var panels = {
