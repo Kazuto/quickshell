@@ -36,7 +36,9 @@ Singleton {
                 if (trimmed.length === 0) return
 
                 try {
-                    root.notifications = JSON.parse(trimmed)
+                    // An error response has no threads in it, such as when logged out
+                    var threads = JSON.parse(trimmed)
+                    root.notifications = Array.isArray(threads) ? threads.filter(t => t.id) : []
                 } catch (e) {
                     // Ignore parse errors for empty or partial output
                 }
