@@ -22,3 +22,4 @@ singleton LogitechData 1.0 LogitechData.qml
 singleton BrightnessData 1.0 BrightnessData.qml
 singleton HotkeyData 1.0 HotkeyData.qml
 singleton ClipboardData 1.0 ClipboardData.qml
+singleton UpdateData 1.0 UpdateData.qml

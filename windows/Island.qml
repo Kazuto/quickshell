@@ -157,7 +157,8 @@ PanelWindow {
                 "panel-vpn": vpnPanel,
                 "panel-devices": devicesPanel,
                 "panel-battery": batteryPanel,
-                "panel-monitor": monitorPanel
+                "panel-monitor": monitorPanel,
+                "panel-updates": updatesPanel
             })
         }
 
@@ -244,4 +245,5 @@ PanelWindow {
     Component { id: devicesPanel; Panels.DevicesPanel {} }
     Component { id: batteryPanel; Panels.BatteryPanel {} }
     Component { id: monitorPanel; Panels.MonitorPanel {} }
+    Component { id: updatesPanel; Panels.UpdatesPanel {} }
 }

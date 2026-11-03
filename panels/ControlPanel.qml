@@ -267,6 +267,48 @@ PanelFrame {
     }
 
     Rectangle {
+        width: parent.width
+        height: 40
+        radius: 20
+        color: updatesMouse.containsMouse ? Theme.surfaceHigh : Theme.surfaceLow
+
+        Row {
+            x: 16
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 12
+
+            IslandLabel {
+                text: "Updates"
+                kind: "meta"
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            SvgIcon {
+                name: "update"
+                size: 16
+                color: UpdateData.warnings.length > 0 ? Theme.warn : UpdateData.needsAttention ? Theme.accent : Theme.text
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            IslandLabel {
+                text: UpdateData.updates.length > 0 ? UpdateData.updates.length + " available"
+                    : UpdateData.restartNeeded ? "Restart needed"
+                    : UpdateData.warnings.length > 0 ? "See details"
+                    : "Up to date"
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+
+        MouseArea {
+            id: updatesMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: panel.openDetail("updates")
+        }
+    }
+
+    Rectangle {
         visible: BatteryData.present
         width: parent.width
         height: 44

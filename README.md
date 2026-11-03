@@ -39,6 +39,15 @@ right click to cancel. `area-select` on the socket answers with `x,y wxh`, and
 that folder first in PATH. The look is in `shaders/yarn.*`, and the compile command for the
 `.qsb` files is at the top of each shader.
 
+## Updates
+
+An icon appears on the island when something can be updated, a restart is pending, or
+something about the sources looks wrong. `scripts/check-updates.sh` asks apt, pacman and an
+AUR helper, snap, flatpak and fwupd, whichever are installed, every hour and whenever the
+panel opens. It needs no root. Installing runs `scripts/run-updates.sh` in a terminal, so
+each manager can show what it's about to do. Packages go together and firmware one device at
+a time. Tools built by hand aren't covered.
+
 ## IPC
 
 Send commands to the socket at `/tmp/quickshell.sock`, for example
@@ -49,7 +58,7 @@ Send commands to the socket at `/tmp/quickshell.sock`, for example
   `calendar-toggle`, `timer-toggle`, `recorder-toggle`, `control-toggle`,
   `system-toggle` (also `menu-toggle`, `power-toggle`), `network-toggle`,
   `bluetooth-toggle`, `audio-toggle`, `vpn-toggle`, `devices-toggle`,
-  `battery-toggle`, `monitor-toggle`
+  `battery-toggle`, `monitor-toggle`, `updates-toggle`
 - OSD: `osd-volume:<0-100>:<muted|unmuted>`, `osd-brightness:<0-100>`
 
 ## Developing
@@ -69,7 +78,8 @@ stays with the live shell.
 
 `cliphist`, `wf-recorder`, `slurp`, `grimblast`, `hyprpicker`, `awww`, `magick`,
 `brightnessctl`, `powerprofilesctl`, `pamixer` and `playerctl`-style MPRIS players
-for the rest.
+for the rest. `jq` for firmware updates and, on Arch, `pacman-contrib` for up-to-date
+package counts.
 
 ## Troubleshooting
 

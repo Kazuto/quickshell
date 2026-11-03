@@ -18,7 +18,7 @@ Rectangle {
 
     // Singletons start on first use. These collect history and counts a panel
     // should already have the first time it opens.
-    readonly property var preloaded: [SystemStatsData, LogitechData, BatteryData, GitHubData]
+    readonly property var preloaded: [SystemStatsData, LogitechData, BatteryData, GitHubData, UpdateData]
 
     // One island per output; the scrim sits below it while a panel is open
     Variants {
@@ -109,7 +109,8 @@ Rectangle {
                         "vpn-toggle": "vpn",
                         "devices-toggle": "devices",
                         "battery-toggle": "battery",
-                        "monitor-toggle": "monitor"
+                        "monitor-toggle": "monitor",
+                        "updates-toggle": "updates"
                     }
 
                     if (panels[msg]) {

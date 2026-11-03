@@ -107,6 +107,26 @@ Item {
             }
 
             Item {
+                visible: UpdateData.needsAttention
+                implicitWidth: 14
+                implicitHeight: Config.islandHeight
+
+                SvgIcon {
+                    anchors.centerIn: parent
+                    name: "update"
+                    size: 14
+                    color: UpdateData.warnings.length > 0 ? Theme.warn : Theme.accent
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.margins: -4
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: AppState.togglePanel("updates", root.screen.name)
+                }
+            }
+
+            Item {
                 implicitWidth: 14
                 implicitHeight: Config.islandHeight
 
