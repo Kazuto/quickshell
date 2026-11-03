@@ -14,6 +14,15 @@ output, with everything else morphing out of it.
 - `singletons/IslandData.qml` - who gets the core, by the design's priority order
 - `Theme.qml`, `Config.qml` - the design tokens
 
+## Accent
+
+`scripts/apply-accent.sh` takes the accent from the wallpaper and passes it on to
+Hyprland's borders, Ghostty's cursor, Neovim, Yazi, tmux and the Starship directory.
+Backgrounds and syntax colors stay Catppuccin Mocha. It runs from `set-wallpaper.sh`,
+and "Derive accent from wallpaper" in the wallpaper picker turns it off. Generated
+files go in `~/.cache/quickshell`, apart from Yazi's flavor, which has to live in
+`~/.config/yazi/flavors`.
+
 ## IPC
 
 Send commands to the socket at `/tmp/quickshell.sock`, for example

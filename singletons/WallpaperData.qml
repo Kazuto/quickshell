@@ -20,11 +20,11 @@ Singleton {
     property string current: ""
     property bool applying: false
 
-    // Hex color, or "" to use the default accent. Empty also means the
-    // "Derive accent from wallpaper" option is off.
+    // scripts/apply-accent.sh owns the accent: it runs whenever a wallpaper is set
+    // and also updates the other apps, so this only follows what it writes.
+    readonly property string accentScript: Quickshell.shellDir + "/scripts/apply-accent.sh"
     property string accentOverride: ""
-    property bool deriveAccent: false
-    readonly property string accentPath: "$HOME/.cache/quickshell/accent"
+    property bool deriveAccent: true
     property string selectedDimensions: ""
 
     function shellQuote(str) {
@@ -83,64 +83,44 @@ Singleton {
         if (!path || applying) return
         applying = true
         current = path
+        // set-wallpaper.sh updates the accent itself, for its other callers
         var setter = output
             ? "awww img " + root.shellQuote(path) + " --outputs " + root.shellQuote(output) +
-              " --resize crop --transition-type grow --transition-duration 0.5 --transition-fps 60 --transition-pos top-right"
+              " --resize crop --transition-type grow --transition-duration 0.5 --transition-fps 60 --transition-pos top-right" +
+              " && " + root.shellQuote(root.accentScript) + " " + root.shellQuote(path)
             : root.setScript + " " + root.shellQuote(path)
         applyProc.command = ["sh", "-c", setter +
             " && printf '%s' " + root.shellQuote(path) + " > " + root.currentPath]
         applyProc.running = true
-        if (deriveAccent) deriveFrom(path)
+    }
+
+    Process {
+        id: applyProc
+        onExited: root.applying = false
     }
 
     function setDeriveAccent(enabled) {
         deriveAccent = enabled
-        if (enabled) {
-            if (current) deriveFrom(current)
-        } else {
-            saveAccent("")
+        Quickshell.execDetached([root.accentScript, enabled ? "--derive" : "--fixed"])
+    }
+
+    FileView {
+        id: accentFile
+        path: Quickshell.env("HOME") + "/.cache/quickshell/accent"
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: {
+            // Rewritten in place, so a read can land between truncate and write
+            var hex = text().trim()
+            if (/^#[0-9a-fA-F]{6}$/.test(hex)) root.accentOverride = hex
         }
-    }
-
-    function deriveFrom(path) {
-        accentProc.command = ["sh", "-c", "magick " + root.shellQuote(path) +
-            " -resize 64x64 -colors 8 -format %c histogram:info:-"]
-        accentProc.running = true
-    }
-
-    function saveAccent(hex) {
-        accentOverride = hex
-        Quickshell.execDetached(["sh", "-c", "mkdir -p $HOME/.cache/quickshell && printf '%s' '" +
-            hex + "' > " + root.accentPath])
-    }
-
-    // Picks the most colorful histogram entry, weighted by how much of the
-    // image it covers, then lifts it to a lightness that stays readable on
-    // the island and under dark on-accent text.
-    function pickAccent(histogram) {
-        var best = null
-        var bestScore = 0
-        var lines = histogram.split("\n")
-        for (var i = 0; i < lines.length; i++) {
-            var match = lines[i].match(/^\s*(\d+):.*#([0-9A-Fa-f]{6})/)
-            if (!match) continue
-            var c = Qt.color("#" + match[2])
-            var score = c.hslSaturation * Math.sqrt(parseInt(match[1], 10))
-            if (c.hslLightness < 0.15 || c.hslLightness > 0.92) score *= 0.2
-            if (score > bestScore) {
-                bestScore = score
-                best = c
-            }
-        }
-        if (!best || best.hslSaturation < 0.12) return ""
-        return Qt.hsla(best.hslHue, Math.max(0.45, Math.min(0.85, best.hslSaturation)), 0.78, 1).toString()
     }
 
     Process {
-        id: accentProc
-        stdout: StdioCollector {
-            onStreamFinished: root.saveAccent(root.pickAccent(this.text))
-        }
+        id: loadDeriveProc
+        command: ["sh", "-c", "test -e $HOME/.cache/quickshell/accent-fixed"]
+        onExited: (exitCode, exitStatus) => { root.deriveAccent = exitCode !== 0 }
     }
 
     function identify(path) {
@@ -159,22 +139,6 @@ Singleton {
     }
 
     Process {
-        id: loadAccentProc
-        command: ["sh", "-c", "cat " + root.accentPath + " 2>/dev/null"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                root.accentOverride = this.text.trim()
-                root.deriveAccent = root.accentOverride !== ""
-            }
-        }
-    }
-
-    Process {
-        id: applyProc
-        onExited: root.applying = false
-    }
-
-    Process {
         id: loadCurrentProc
         command: ["sh", "-c", "cat " + root.currentPath + " 2>/dev/null"]
         stdout: SplitParser {
@@ -186,7 +150,7 @@ Singleton {
 
     Component.onCompleted: {
         loadCurrentProc.running = true
-        loadAccentProc.running = true
+        loadDeriveProc.running = true
         refresh()
     }
 }
