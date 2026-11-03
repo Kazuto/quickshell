@@ -23,6 +23,13 @@ and "Derive accent from wallpaper" in the wallpaper picker turns it off. Generat
 files go in `~/.cache/quickshell`. Yazi uses palette color 89, which the script
 redefines in Ghostty, so open Yazi windows recolor without a restart.
 
+GTK apps need the `catppuccin-mocha-pink-standard+default` theme installed. The script
+makes two accent copies of it in `~/.local/share/themes` and switches between them,
+which recolors Thunar and Chrome's "Use GTK" mode live. libadwaita apps read
+`~/.config/gtk-4.0/gtk.css` at launch. Vivaldi can load `~/.cache/quickshell/vivaldi`
+as a CSS mod, also at launch: turn on CSS modifications in `vivaldi://experiments` and
+set the folder under Custom UI Modifications.
+
 ## IPC
 
 Send commands to the socket at `/tmp/quickshell.sock`, for example
