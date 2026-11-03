@@ -114,7 +114,9 @@ Item {
                     anchors.centerIn: parent
                     name: NotificationData.paused ? "bell-slash" : "bell"
                     size: 14
-                    color: bellMouse.containsMouse ? Theme.text : Theme.textDim
+                    color: NotificationData.notifications.length + GitHubData.notifications.length > 0
+                        ? Theme.accent
+                        : bellMouse.containsMouse ? Theme.text : Theme.textDim
                 }
 
                 MouseArea {
