@@ -44,7 +44,7 @@ Singleton {
     readonly property var curveEaseIn: [0.4, 0, 1, 1, 1, 1]
     readonly property var curveEaseOut: [0, 0, 0.2, 1, 1, 1]
 
-    // Which workspaces each output shows, mirroring hypr/workspaces.conf.
+    // Which workspaces each output shows, mirroring the Hyprland config's workspace rules.
     // Matched on the stable part of the monitor's description, since Hyprland's
     // DP-x names can change across reconnects.
     readonly property var workspaceLayout: [

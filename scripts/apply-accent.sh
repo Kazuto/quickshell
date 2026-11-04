@@ -234,8 +234,10 @@ EOF
 
 apply_hyprland() {
     hex=${1#\#}
-    hyprctl keyword general:col.active_border \
-        "rgb($hex) rgb($MOCHA_BASE) rgb($MOCHA_BASE) rgb($hex) 45deg" >/dev/null 2>&1
+    # Only a Lua config answers ok to eval. A hyprland.conf needs keyword instead.
+    [ "$(hyprctl eval "hl.config({ general = { col = { active_border = { colors = { 'rgb($hex)', 'rgb($MOCHA_BASE)', 'rgb($MOCHA_BASE)', 'rgb($hex)' }, angle = 45 } } } })" 2>/dev/null)" = ok ] ||
+        hyprctl keyword general:col.active_border \
+            "rgb($hex) rgb($MOCHA_BASE) rgb($MOCHA_BASE) rgb($hex) 45deg" >/dev/null 2>&1
 }
 
 apply() {

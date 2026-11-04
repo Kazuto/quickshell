@@ -17,8 +17,9 @@ Rectangle {
     }
 
     // Singletons start on first use. These collect history and counts a panel
-    // should already have the first time it opens.
-    readonly property var preloaded: [SystemStatsData, LogitechData, BatteryData, GitHubData, UpdateData]
+    // should already have the first time it opens, and HyprlandData has to know
+    // the config format before the first click sends Hyprland a command.
+    readonly property var preloaded: [SystemStatsData, LogitechData, BatteryData, GitHubData, UpdateData, HyprlandData]
 
     // One island per output; the scrim sits below it while a panel is open
     Variants {

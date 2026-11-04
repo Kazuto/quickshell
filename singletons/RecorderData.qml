@@ -64,7 +64,7 @@ Singleton {
     // Click a visible window: slurp -r restricts selection to the boxes on stdin.
     // The rule is the same as grimblast's, so the overlay can't fade out into the recording.
     readonly property string windowPicker: `
-        hyprctl keyword layerrule 'match:namespace ^selection$, no_anim on' >/dev/null
+        ${HyprlandData.selectionRuleCommand} >/dev/null
         ws=$(hyprctl monitors -j | jq -c '[.[].activeWorkspace.id]')
         hyprctl clients -j | jq -r --argjson ws "$ws" '.[] | select(.workspace.id as $w | $ws | index($w)) | "\\(.at[0]),\\(.at[1]) \\(.size[0])x\\(.size[1])"' | slurp -r
     `

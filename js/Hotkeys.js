@@ -1,7 +1,8 @@
 .pragma library
 
-// Turns hyprland.conf bind lines into the labelled sections of the hotkey
-// sheet. Pure string handling, so it can be exercised without a running shell.
+// Turns hyprland.conf or hyprland.lua bind lines into the labelled sections of
+// the hotkey sheet. Pure string handling, so it can be exercised without a
+// running shell.
 
 var overlayLabels = {
     "launcher-toggle": "Launcher",
@@ -32,13 +33,17 @@ function chord(mods, key) {
     return parts.join(" ")
 }
 
+// Media keys and mouse binds aren't worth a row on the sheet
+function hiddenKey(key) {
+    return /^XF86/.test(key) || /^mouse/.test(key)
+}
+
 function parseLine(line) {
     var match = line.match(/^\s*bind[a-z]*\s*=\s*([^,]*),\s*([^,]+?)\s*,\s*([^,#\s]+)\s*,?\s*(.*)$/)
     if (!match) return null
     if (/^\s*bindm/.test(line)) return null
     var key = match[2].trim()
-    // Media keys and mouse wheel binds aren't worth a row on the sheet
-    if (/^XF86/.test(key) || /^mouse/.test(key)) return null
+    if (hiddenKey(key)) return null
     var args = match[4]
     var comment = ""
     var hash = args.indexOf(" # ")
@@ -51,6 +56,49 @@ function parseLine(line) {
         key: key,
         dispatcher: match[3].trim(),
         args: args.trim(),
+        comment: comment
+    }
+}
+
+var luaDispatchers = {
+    "exec_cmd": "exec",
+    "window.close": "killactive",
+    "window.float": "togglefloating",
+    "window.fullscreen": "fullscreen",
+    "window.resize": "resizeactive",
+    "group.toggle": "togglegroup",
+    "group.next": "changegroupactive",
+    "workspace.toggle_special": "togglespecialworkspace"
+}
+
+// Lua binds get their hyprland.conf dispatcher name, so nothing past parsing has
+// to know which format it's reading.
+function dispatcherForLua(name, args) {
+    var toWorkspace = /\bworkspace\s*=/.test(args)
+    if (name === "focus") return toWorkspace ? "workspace" : "movefocus"
+    if (name === "window.move") return toWorkspace ? "movetoworkspace" : "movewindow"
+    return luaDispatchers[name] || name
+}
+
+// hl.bind("SUPER + B", hl.dsp.exec_cmd("chromium"), { repeating = true }) -- comment
+function parseLuaLine(line) {
+    var comment = ""
+    var trailing = line.match(/\)\s+--\s+([^"')]*)$/)
+    if (trailing) {
+        comment = trailing[1].trim()
+        line = line.substring(0, trailing.index + 1)
+    }
+    var match = line.match(/^\s*hl\.bind\("([^"]+)",\s*hl\.dsp\.([a-z_.]+)\((.*)\)\s*(?:,\s*\{[^{}]*\}\s*)?\)\s*$/)
+    if (!match) return null
+    var mods = match[1].split(" + ")
+    var key = mods.pop()
+    if (hiddenKey(key)) return null
+    return {
+        mods: mods,
+        key: key,
+        dispatcher: dispatcherForLua(match[2], match[3]),
+        // A lone quoted command loses its quotes, so its first word is the program
+        args: match[3].trim().replace(/^["']([^"']*)["']$/, "$1"),
         comment: comment
     }
 }
@@ -114,7 +162,7 @@ function parse(text) {
 
     var lines = text.split("\n")
     for (var i = 0; i < lines.length; i++) {
-        var bind = parseLine(lines[i])
+        var bind = parseLine(lines[i]) || parseLuaLine(lines[i])
         if (!bind) continue
 
         if (bind.dispatcher === "exec") {
