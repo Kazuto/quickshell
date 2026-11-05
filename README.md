@@ -48,6 +48,13 @@ panel opens. It needs no root. Installing runs `scripts/run-updates.sh` in a ter
 each manager can show what it's about to do. Packages go together and firmware one device at
 a time. Tools built by hand aren't covered.
 
+## Steam games
+
+The launcher also lists the installed Steam games. `scripts/steam-games.sh` reads them from
+Steam's library manifests whenever the launcher opens, leaving out Proton and the runtimes.
+A game with a desktop shortcut from Steam isn't listed twice. They start through the `steam`
+command, so games from elsewhere still need a `.desktop` file.
+
 ## Hyprland versions
 
 Both config formats work. Hyprland 0.57 only reads `hyprland.lua`, older releases only

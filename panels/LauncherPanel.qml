@@ -27,7 +27,10 @@ PanelFrame {
     function buildFiltered() {
         var query = filterText.trim().toLowerCase()
         var result = []
-        var vals = DesktopEntries.applications.values
+        var entries = Array.from(DesktopEntries.applications.values)
+        // A game with a shortcut from Steam already has an entry
+        var games = SteamData.games.filter(game => !entries.some(e => e.execString.trim().endsWith(game.execString)))
+        var vals = entries.concat(games)
         for (var i = 0; i < vals.length; i++) {
             var e = vals[i]
             if (!e || !e.name || e.noDisplay) continue
@@ -55,11 +58,19 @@ PanelFrame {
     }
 
     onFilterTextChanged: buildFiltered()
-    Component.onCompleted: buildFiltered()
+    Component.onCompleted: {
+        buildFiltered()
+        SteamData.refresh()
+    }
 
     Connections {
         target: DesktopEntries
         function onApplicationsChanged() { panel.buildFiltered() }
+    }
+
+    Connections {
+        target: SteamData
+        function onGamesChanged() { panel.buildFiltered() }
     }
 
     Connections {
