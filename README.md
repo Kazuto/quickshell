@@ -54,7 +54,8 @@ Both config formats work. Hyprland 0.57 only reads `hyprland.lua`, older release
 `hyprland.conf`, and `hyprctl` takes different commands with each.
 `singletons/HyprlandData.qml` asks the running Hyprland which one it's using and sends the
 right form. The hotkey sheet reads that same file, so with Lua each bind has to stay on one
-line with its command inline.
+line with its command inline. It also checks the version, because 0.57 changed how exclusive
+layers get the keyboard and the pointer, and the scrim behind panels depends on that.
 
 ## IPC
 
@@ -67,6 +68,7 @@ Send commands to the socket at `/tmp/quickshell.sock`, for example
   `system-toggle` (also `menu-toggle`, `power-toggle`), `network-toggle`,
   `bluetooth-toggle`, `audio-toggle`, `vpn-toggle`, `devices-toggle`,
   `battery-toggle`, `monitor-toggle`, `updates-toggle`
+- Media: `media-play-pause`, `media-next`, `media-previous`, for the player the island shows
 - OSD: `osd-volume:<0-100>:<muted|unmuted>`, `osd-brightness:<0-100>`
 
 ## Developing

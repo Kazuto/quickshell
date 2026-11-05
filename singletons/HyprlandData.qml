@@ -14,6 +14,10 @@ Singleton {
     property bool lua: false
     readonly property string configFile: lua ? "hyprland.lua" : "hyprland.conf"
 
+    // Before 0.57 the pointer only reaches exclusive layers while one holds the keyboard. From
+    // 0.57 it reaches every layer, and any exclusive layer under it takes the keyboard.
+    property bool pointerReachesAllLayers: false
+
     // Stops a selection overlay fading out into a capture. The same rule grimblast sets.
     readonly property string selectionRuleCommand: lua
         ? `hyprctl eval 'hl.layer_rule({ match = { namespace = "^selection$" }, no_anim = true })'`
@@ -42,6 +46,21 @@ Singleton {
         command: ["hyprctl", "eval", "local _ = 1"]
         stdout: StdioCollector {
             onStreamFinished: root.lua = this.text.trim() === "ok"
+        }
+    }
+
+    Process {
+        running: true
+        command: ["hyprctl", "version", "-j"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const version = /^v?(\d+)\.(\d+)/.exec(JSON.parse(this.text).tag)
+                    root.pointerReachesAllLayers = Number(version[1]) > 0 || Number(version[2]) >= 57
+                } catch (e) {
+                    console.warn("Could not read the Hyprland version:", e)
+                }
+            }
         }
     }
 }

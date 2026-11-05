@@ -120,6 +120,19 @@ Rectangle {
                         return
                     }
 
+                    // The media keys act on the player the island shows
+                    var media = {
+                        "media-play-pause": "togglePlaying",
+                        "media-next": "next",
+                        "media-previous": "previous"
+                    }
+
+                    if (media[msg]) {
+                        MediaData[media[msg]]()
+
+                        return
+                    }
+
                     if (msg.startsWith("osd-volume:")) {
                         // "osd-volume:<0-100>:<muted|unmuted>"
                         var parts = msg.split(":")

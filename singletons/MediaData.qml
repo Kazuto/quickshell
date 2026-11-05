@@ -10,8 +10,8 @@ Singleton {
 
     property var lastPlaying: null
 
-    // Whichever player is playing, sticking with the current one when several
-    // are; otherwise the last one that played, so the panel keeps its controls.
+    // Whichever player started playing last; otherwise the last one that played,
+    // so the panel keeps its controls.
     readonly property var player: {
         var list = Mpris.players.values
         var playing = null
@@ -49,6 +49,18 @@ Singleton {
     }
 
     Component.onCompleted: showing = isPlaying
+
+    // A player that starts takes over, even while another one keeps playing
+    Instantiator {
+        model: Mpris.players
+        delegate: Connections {
+            required property var modelData
+            target: modelData
+            function onIsPlayingChanged() {
+                if (modelData.isPlaying) root.lastPlaying = modelData
+            }
+        }
+    }
 
     Timer {
         id: graceTimer
