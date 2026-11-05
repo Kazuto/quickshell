@@ -55,6 +55,14 @@ Steam's library manifests whenever the launcher opens, leaving out Proton and th
 A game with a desktop shortcut from Steam isn't listed twice. They start through the `steam`
 command, so games from elsewhere still need a `.desktop` file.
 
+## App icons
+
+The tray and launcher draw app icons from `js/sketchybar-app-font.ttf`, which `Main.qml`
+loads so that an installed copy doesn't matter. Each build of the font moves its codepoints,
+so replacing the file means regenerating `js/AppGlyphs.js`, as `js/README.md` shows.
+`js/AppIcons.js` picks glyphs by name, so it doesn't change. The launcher shows the app's first
+letter when the font has no icon with its exact name.
+
 ## Hyprland versions
 
 Both config formats work. Hyprland 0.57 only reads `hyprland.lua`, older releases only

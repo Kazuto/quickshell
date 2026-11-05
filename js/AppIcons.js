@@ -1,5 +1,7 @@
 .pragma library
 
+.import "AppGlyphs.js" as AppGlyphs
+
 // Shared app-name → icon-glyph mapping. Used by WindowTitle.qml (active
 // window) and Tray.qml (system tray) so both places render the same
 // monochrome glyph for a given app instead of maintaining two separate
@@ -23,33 +25,27 @@ function normalize(id) {
 
 // Ordered so more specific keys can be listed before broader ones if ever
 // needed; lookup just takes the first substring match.
-// `offsetX` is an optional manual horizontal nudge (in px) for glyphs whose
-// font has an asymmetric left/right side-bearing baked in — generic
-// centering (anchors.centerIn / AlignHCenter) centers the glyph's *declared*
-// bounding box, which doesn't always match where the visible ink actually
-// sits, so some glyphs need a small manual correction to look centered.
 var ENTRIES = [
-    { match: ["ghostty"],               char: "\uEAD9", font: "sketchybar-app-font" },
-    { match: ["firefox"],               char: "\uEABF", font: "sketchybar-app-font" },
-    { match: ["googlechrome", "chrome"], char: "\uEAE3", font: "sketchybar-app-font" },
-    { match: ["bruno"],                 char: "\uEA4D", font: "sketchybar-app-font" },
-    { match: ["slack"],                 char: "\uEC04", font: "sketchybar-app-font" },
-    { match: ["vesktop"],               char: "\uEC51", font: "sketchybar-app-font" },
-    { match: ["discord"],               char: "\uEA9C", font: "sketchybar-app-font" },
-    { match: ["spotify"],               char: "\uEC0F", font: "sketchybar-app-font", offsetX: 3 },
-    { match: ["dolphin"],               char: "\uEAA0", font: "sketchybar-app-font" },
-    { match: ["kitty"],                 char: "\uEB22", font: "sketchybar-app-font" },
-    { match: ["obsidian"],              char: "\uEB81", font: "sketchybar-app-font" },
-    { match: ["code"],                  char: "\uEA72", font: "sketchybar-app-font" },
-    { match: ["thunderbird"],           char: "\uEC34", font: "sketchybar-app-font" },
-    { match: ["vivaldi"],               char: "\uEC56", font: "sketchybar-app-font" },
-    { match: ["docker"],                char: "\uEA9E", font: "sketchybar-app-font" },
-    { match: ["protonmail"],            char: "\uEBC3", font: "sketchybar-app-font" },
-    { match: ["tableplus"],             char: "\uEC25", font: "sketchybar-app-font" },
-    { match: ["figma"],                 char: "\uEAB8", font: "sketchybar-app-font" },
-    // No sketchybar-app-font glyph for 1Password — fall back to the Nerd
-    // Font lock icon (same codepoint as Icon.qml's `lock` property).
-    { match: ["onepassword", "1password"], char: "\uF023", font: null },
+    { match: ["ghostty"],               glyph: "ghostty" },
+    { match: ["firefox"],               glyph: "firefox" },
+    { match: ["googlechrome", "chrome"], glyph: "googlechrome" },
+    { match: ["bruno"],                 glyph: "bruno" },
+    { match: ["slack"],                 glyph: "slack" },
+    { match: ["vesktop"],               glyph: "vesktop" },
+    { match: ["discord"],               glyph: "discord" },
+    { match: ["spotify"],               glyph: "spotify" },
+    { match: ["dolphin"],               glyph: "dolphin" },
+    { match: ["kitty"],                 glyph: "kitty" },
+    { match: ["obsidian"],              glyph: "obsidian" },
+    { match: ["code"],                  glyph: "code" },
+    { match: ["thunderbird"],           glyph: "thunderbird" },
+    { match: ["vivaldi"],               glyph: "vivaldi" },
+    { match: ["docker"],                glyph: "docker" },
+    { match: ["protonmail"],            glyph: "protonmail" },
+    { match: ["tableplus"],             glyph: "tableplus" },
+    { match: ["steam"],                 glyph: "steam" },
+    { match: ["figma"],                 glyph: "figma" },
+    { match: ["onepassword", "1password"], glyph: "onepassword" },
 ]
 
 // Display-name rewrites for apps whose window class / tray id isn't
@@ -88,13 +84,41 @@ function findEntry(id, table) {
     return null
 }
 
-// Returns { char, font, offsetX } or null if there's no known glyph for
-// this id. `font` is either "sketchybar-app-font" or null (meaning: use
-// the caller's regular Nerd Font family). `offsetX` defaults to 0.
+// A glyph of the font by its normalized name, so nothing here depends on the
+// codepoints of one build of it. Returns { char, font } or null.
+function glyphNamed(name) {
+    if (!AppGlyphs.GLYPHS.hasOwnProperty(name)) return null
+    return { char: AppGlyphs.GLYPHS[name], font: "sketchybar-app-font" }
+}
+
+// Returns { char, font } or null if there's no known glyph for this id.
+// `font` is either "sketchybar-app-font" or null (meaning: use the caller's
+// regular Nerd Font family).
 function glyphFor(id) {
     var entry = findEntry(id, ENTRIES)
-    if (!entry) return null
-    return { char: entry.char, font: entry.font, offsetX: entry.offsetX || 0 }
+    return entry ? glyphOf(entry) : null
+}
+
+function glyphOf(entry) {
+    return entry.glyph ? glyphNamed(entry.glyph) : { char: entry.char, font: entry.font }
+}
+
+// Returns { char, font } or null for an app in the launcher, going by its name, icon,
+// window class and desktop id. These have to match exactly, because a substring would
+// find far too much across the whole font. The names in ENTRIES count too, for apps the
+// font calls something else, like "1password".
+function glyphForApp(app) {
+    var ids = [app.name, app.icon, app.startupClass, app.id, String(app.id || "").split(".").pop()]
+    for (var i = 0; i < ids.length; i++) {
+        var key = normalize(ids[i])
+        var glyph = glyphNamed(key)
+        if (glyph) return glyph
+
+        for (var j = 0; j < ENTRIES.length; j++) {
+            if (ENTRIES[j].match.indexOf(key) >= 0) return glyphOf(ENTRIES[j])
+        }
+    }
+    return null
 }
 
 // Returns a human-readable app name for this id, falling back to the

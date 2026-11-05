@@ -21,6 +21,12 @@ Rectangle {
     // the config format before the first click sends Hyprland a command.
     readonly property var preloaded: [SystemStatsData, LogitechData, BatteryData, GitHubData, UpdateData, HyprlandData]
 
+    // Every build of this font moves nearly all its codepoints, and js/AppGlyphs.js lists them
+    // for this one, so each machine uses this copy. It wins over an installed one of the same name.
+    FontLoader {
+        source: "file://" + Quickshell.shellDir + "/js/sketchybar-app-font.ttf"
+    }
+
     // One island per output; the scrim sits below it while a panel is open
     Variants {
         model: Quickshell.screens

@@ -3,6 +3,7 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Services.SystemTray
 import "root:/"
+import "root:/components"
 import "root:/js/AppIcons.js" as AppIcons
 
 Rectangle {
@@ -55,10 +56,8 @@ Rectangle {
                     color: iconMa.containsMouse ? Theme.surfaceHigh : "transparent"
                 }
 
-                Text {
+                AppGlyph {
                     visible: !!cell.glyph
-                    anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: cell.glyph ? cell.glyph.offsetX : 0
                     text: cell.glyph ? cell.glyph.char : ""
                     font.family: cell.glyph && cell.glyph.font ? cell.glyph.font : Config.moduleFontFamily
                     font.pixelSize: root.iconSize

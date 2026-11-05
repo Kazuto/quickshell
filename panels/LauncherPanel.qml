@@ -4,6 +4,7 @@ import "root:/"
 import "root:/singletons"
 import "root:/components"
 import "root:/js/KeyNav.js" as KeyNav
+import "root:/js/AppIcons.js" as AppIcons
 
 // K1
 PanelFrame {
@@ -161,6 +162,7 @@ PanelFrame {
             required property var modelData
 
             readonly property bool selected: index === panel.selectedIndex
+            readonly property var glyph: panel.actionsOf ? null : AppIcons.glyphForApp(modelData)
 
             width: list.width
             height: 48
@@ -178,8 +180,17 @@ PanelFrame {
 
                 IslandLabel {
                     anchors.centerIn: parent
+                    visible: !row.glyph
                     text: (row.modelData.name || "?").charAt(0).toUpperCase()
                     kind: "island"
+                    color: row.selected ? Theme.textOnAccent : Theme.text
+                }
+
+                AppGlyph {
+                    visible: !!row.glyph
+                    text: row.glyph ? row.glyph.char : ""
+                    font.family: row.glyph ? row.glyph.font : ""
+                    font.pixelSize: 20
                     color: row.selected ? Theme.textOnAccent : Theme.text
                 }
             }
