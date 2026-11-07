@@ -15,7 +15,7 @@ Singleton {
     readonly property string setScript: "$HOME/.config/swww/set-wallpaper.sh"
     readonly property string currentPath: "$HOME/.cache/quickshell/current_wallpaper"
 
-    property var wallpapers: []   // [{ name, path, thumb }]
+    property var wallpapers: []   // [{ name, path, thumb, thumbVersion }]
     property bool loaded: false
     property string current: ""
     property bool applying: false
@@ -45,7 +45,10 @@ Singleton {
     // progressively instead of waiting for the whole directory to finish.
     // The target resolution is baked into the cache filename so bumping it
     // (e.g. for a larger carousel preview) automatically invalidates old
-    // low-res thumbnails instead of silently reusing them.
+    // low-res thumbnails instead of silently reusing them. A wallpaper edited
+    // in place (e.g. recolored) is newer than its thumbnail, so that gets
+    // regenerated too; the thumbnail's mtime goes out with it so the picker
+    // can bust Qt's pixmap cache, which would otherwise keep the old image.
     readonly property string thumbSize: "960x540"
 
     Process {
@@ -55,11 +58,11 @@ Singleton {
             find ` + root.wallpaperDir + ` -maxdepth 1 -type f \\( -iname '*.avif' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.gif' \\) | sort | while read -r f; do
                 hash=$(printf '%s' "$f-` + root.thumbSize + `" | md5sum | cut -d' ' -f1)
                 thumb="` + root.thumbDir + `/$hash.jpg"
-                if [ ! -f "$thumb" ]; then
+                if [ ! -f "$thumb" ] || [ "$f" -nt "$thumb" ]; then
                     magick "$f" -auto-orient -thumbnail ` + root.thumbSize + `^ -gravity center -extent ` + root.thumbSize + ` -quality 90 "$thumb" 2>/dev/null
                 fi
                 if [ -f "$thumb" ]; then
-                    echo "WP:$f|||$thumb"
+                    echo "WP:$f|||$thumb|||$(stat -c %Y "$thumb")"
                 fi
             done
         `]
@@ -67,11 +70,12 @@ Singleton {
             onRead: line => {
                 if (!line.startsWith("WP:")) return
                 var parts = line.substring(3).split("|||")
-                if (parts.length < 2) return
+                if (parts.length < 3) return
                 root.wallpapers = root.wallpapers.concat([{
                     name: parts[0].split("/").pop(),
                     path: parts[0],
-                    thumb: parts[1]
+                    thumb: parts[1],
+                    thumbVersion: parts[2]
                 }])
             }
         }

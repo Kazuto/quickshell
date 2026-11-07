@@ -131,7 +131,9 @@ PanelFrame {
                     RoundedImage {
                         anchors.fill: parent
                         radius: parent.radius
-                        source: thumb.wallpaper ? "file://" + thumb.wallpaper.thumb : ""
+                        source: thumb.wallpaper
+                            ? "file://" + thumb.wallpaper.thumb + "?v=" + thumb.wallpaper.thumbVersion
+                            : ""
                     }
 
                     MouseArea {
