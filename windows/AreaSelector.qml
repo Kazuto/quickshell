@@ -8,6 +8,7 @@ import "root:/singletons"
 // Picks an area for a screenshot or recording, with yarn from the screen's corners to
 // the pointer, or to the corners of the area once it's being dragged. A click without
 // dragging picks the window under the pointer, or the whole screen if there is none.
+// Holding Space while dragging moves the area instead of resizing it, like on macOS.
 PanelWindow {
     id: selector
 
@@ -35,6 +36,13 @@ PanelWindow {
     property real dragStartX: 0
     property real dragStartY: 0
 
+    // Where the pointer really is, which can be off this screen during a drag
+    property real cursorX: 0
+    property real cursorY: 0
+    // Set while Space moves the area: where the pointer and both corners were when it
+    // was pressed, so the area keeps its place under the pointer after hitting an edge
+    property var moveGrab: null
+
     readonly property real areaLeft: Math.min(dragStartX, pointerX)
     readonly property real areaTop: Math.min(dragStartY, pointerY)
     readonly property real areaRight: Math.max(dragStartX, pointerX)
@@ -55,10 +63,42 @@ PanelWindow {
             : { x: 0, y: 0, width: width, height: height }
     }
 
+    function clamp(value, low, high) {
+        return Math.max(low, Math.min(high, value))
+    }
+
     function pointerMoved(x, y) {
         pointerHere = true
-        pointerX = Math.max(0, Math.min(width, x))
-        pointerY = Math.max(0, Math.min(height, y))
+        cursorX = x
+        cursorY = y
+
+        if (moveGrab) {
+            // Both corners shift by the same amount, as far as the screen allows
+            var dx = clamp(x - moveGrab.x,
+                -Math.min(moveGrab.startX, moveGrab.endX), width - Math.max(moveGrab.startX, moveGrab.endX))
+            var dy = clamp(y - moveGrab.y,
+                -Math.min(moveGrab.startY, moveGrab.endY), height - Math.max(moveGrab.startY, moveGrab.endY))
+            dragStartX = moveGrab.startX + dx
+            dragStartY = moveGrab.startY + dy
+            pointerX = moveGrab.endX + dx
+            pointerY = moveGrab.endY + dy
+            return
+        }
+
+        pointerX = clamp(x, 0, width)
+        pointerY = clamp(y, 0, height)
+    }
+
+    function startMoving() {
+        if (!dragged || moveGrab) return
+        moveGrab = { x: cursorX, y: cursorY, startX: dragStartX, startY: dragStartY, endX: pointerX, endY: pointerY }
+    }
+
+    // Resizing picks up from the pointer again, wherever the area was left
+    function stopMoving() {
+        if (!moveGrab) return
+        moveGrab = null
+        if (dragging) pointerMoved(cursorX, cursorY)
     }
 
     function finishAt(area) {
@@ -75,6 +115,10 @@ PanelWindow {
             if (!selector.pointerHere && cursor.x >= selector.screenX && cursor.x < selector.screenX + selector.width
                     && cursor.y >= selector.screenY && cursor.y < selector.screenY + selector.height)
                 selector.pointerMoved(cursor.x - selector.screenX, cursor.y - selector.screenY)
+        }
+        function onSpaceHeldChanged() {
+            if (AreaSelectData.spaceHeld) selector.startMoving()
+            else selector.stopMoving()
         }
     }
 
@@ -213,6 +257,7 @@ PanelWindow {
                 selector.finishAt(selector.clickTarget)
             }
             selector.dragging = false
+            selector.moveGrab = null
         }
     }
 
@@ -220,6 +265,13 @@ PanelWindow {
         anchors.fill: parent
         focus: true
         Keys.onEscapePressed: AreaSelectData.cancel()
+        // Key repeat sends extra presses and releases while Space is held, so those are skipped
+        Keys.onSpacePressed: event => {
+            if (!event.isAutoRepeat) AreaSelectData.spaceHeld = true
+        }
+        Keys.onReleased: event => {
+            if (event.key === Qt.Key_Space && !event.isAutoRepeat) AreaSelectData.spaceHeld = false
+        }
         Component.onCompleted: forceActiveFocus()
     }
 }

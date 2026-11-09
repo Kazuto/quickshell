@@ -13,6 +13,9 @@ Singleton {
     property bool active: false
     // The overlay has blanked itself and is waiting for that to reach the screen
     property bool closing: false
+    // Held while dragging, it moves the area instead of resizing it. It lives here
+    // because keyboard focus can be on another screen's overlay than the drag.
+    property bool spaceHeld: false
 
     // What a click without dragging picks, topmost first: [{ x, y, width, height }]
     property var visibleWindows: []
@@ -26,6 +29,7 @@ Singleton {
 
         deliverDelay.stop()
         closing = false
+        spaceHeld = false
         pendingCallback = callback
         visibleWindows = []
         AppState.closePanel()
