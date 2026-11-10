@@ -55,6 +55,21 @@ Steam's library manifests whenever the launcher opens, leaving out Proton and th
 A game with a desktop shortcut from Steam isn't listed twice. They start through the `steam`
 command, so games from elsewhere still need a `.desktop` file.
 
+## Webcam tracking
+
+With an EMEET PIXY plugged in, the control center gets a Tracking tile that switches the
+camera's AI tracking. `scripts/pixy-track` sends the command over the camera's vendor HID
+interface, using the protocol from [omarchy-emeet-pixy](https://github.com/nille/omarchy-emeet-pixy).
+It also works on its own: `pixy-track [toggle|on|off|status]`. The camera only reports its mode
+while an app is using it, so when it's idle the tile shows the last known state as "camera idle".
+The hidraw node is root-only, so it needs a udev rule once:
+
+```sh
+echo 'SUBSYSTEM=="hidraw", ATTRS{idVendor}=="328f", ATTRS{idProduct}=="00c0", TAG+="uaccess"' \
+  | sudo tee /etc/udev/rules.d/70-emeet-pixy.rules
+sudo udevadm control --reload && sudo udevadm trigger --subsystem-match=hidraw
+```
+
 ## App icons
 
 The tray and launcher draw app icons from `js/sketchybar-app-font.ttf`, which `Main.qml`

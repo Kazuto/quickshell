@@ -1,0 +1,245 @@
+#!/usr/bin/env python3
+"""Toggle AI tracking on an EMEET PIXY webcam (USB 328f:00c0) on Linux.
+
+Talks to the camera's vendor HID interface (usage page 0x83, report ID 0x09,
+32-byte reports). The protocol was reverse-engineered by the community:
+  https://github.com/nille/omarchy-emeet-pixy  (docs/PROTOCOL.md, MIT)
+  https://github.com/Romonaga/PixyPilot
+
+Usage: pixy-track [--json] [toggle|on|off|status]      (default: toggle)
+
+--json prints {"mode", "confirmed", "idle"} or {"error", "message"} for
+scripts. Exit codes: 0 ok, 1 camera not found, 2 camera didn't answer or
+didn't switch, 3 no permission. Set PIXY_HIDRAW=/dev/hidrawN to skip
+auto-detection.
+
+The hidraw node is root-only by default. To let the logged-in user use it:
+  echo 'SUBSYSTEM=="hidraw", ATTRS{idVendor}=="328f", ATTRS{idProduct}=="00c0", TAG+="uaccess"' \\
+    | sudo tee /etc/udev/rules.d/70-emeet-pixy.rules
+  sudo udevadm control --reload && sudo udevadm trigger --subsystem-match=hidraw
+"""
+import glob
+import json
+import os
+import select
+import sys
+import time
+
+VID, PID = "328F", "00C0"
+VENDOR_USAGE = b"\x05\x83\x09\x83"  # Usage Page 0x83, Usage 0x83
+REPORT_ID, REPORT_SIZE = 0x09, 32
+GAP, QUERY_TIMEOUT, QUERY_ATTEMPTS = 0.025, 0.6, 4
+
+MODE_QUERY = [0x09, 0x01, 0x01, 0x01]
+MODE_NAMES = {0x00: "standard", 0x01: "tracking", 0x02: "privacy"}
+MODE_VALUES = {name: value for value, name in MODE_NAMES.items()}
+AMBIGUOUS = 0x03  # idle camera: "standard or tracking, can't tell"
+
+STATE_FILE = os.path.join(
+    os.environ.get("XDG_RUNTIME_DIR") or os.path.expanduser("~/.cache"),
+    "pixy-track.state",
+)
+
+
+class Failure(Exception):
+    def __init__(self, code, kind, message):
+        super().__init__(message)
+        self.code, self.kind, self.message = code, kind, message
+
+
+def find_hidraw():
+    override = os.environ.get("PIXY_HIDRAW")
+    if override:
+        return override
+    for sysdir in sorted(glob.glob("/sys/class/hidraw/hidraw*")):
+        try:
+            with open(f"{sysdir}/device/uevent") as f:
+                uevent = f.read().upper()
+            with open(f"{sysdir}/device/report_descriptor", "rb") as f:
+                descriptor = f.read()
+        except OSError:
+            continue
+        if f":0000{VID}:0000{PID}" in uevent and VENDOR_USAGE in descriptor:
+            return "/dev/" + os.path.basename(sysdir)
+    return None
+
+
+def report(payload):
+    return bytes(payload) + bytes(REPORT_SIZE - len(payload))
+
+
+def drain(fd):
+    while select.select([fd], [], [], 0)[0]:
+        try:
+            os.read(fd, 64)
+        except BlockingIOError:
+            return
+
+
+def query(fd, payload):
+    """Send a query and return the matching reply.
+
+    The camera silently drops the first write on a freshly opened fd,
+    so retry a few times."""
+    rep = report(payload)
+    group, command = rep[1] & 0x1F, rep[2:4]
+    for _ in range(QUERY_ATTEMPTS):
+        drain(fd)
+        os.write(fd, rep)
+        deadline = time.monotonic() + QUERY_TIMEOUT
+        while (remaining := deadline - time.monotonic()) > 0:
+            if not select.select([fd], [], [], remaining)[0]:
+                break
+            try:
+                reply = os.read(fd, 64)
+            except BlockingIOError:
+                continue
+            if (len(reply) >= 9 and reply[0] == REPORT_ID
+                    and (reply[1] & 0x1F) == group and reply[2:4] == command):
+                return reply
+        time.sleep(GAP)
+    return None
+
+
+def read_mode(fd):
+    reply = query(fd, MODE_QUERY)
+    return None if reply is None else reply[8]
+
+
+def write_mode(fd, name):
+    # Set, then query: the camera only commits the mode after the query.
+    os.write(fd, report([0x09, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01,
+                         MODE_VALUES[name]]))
+    time.sleep(GAP)
+    os.write(fd, report(MODE_QUERY))
+    time.sleep(0.2)
+    return read_mode(fd)
+
+
+def load_state():
+    try:
+        with open(STATE_FILE) as f:
+            return f.read().strip() or None
+    except OSError:
+        return None
+
+
+def save_state(name):
+    try:
+        with open(STATE_FILE, "w") as f:
+            f.write(name)
+    except OSError:
+        pass
+
+
+def run(cmd):
+    """Returns (raw mode byte after the command, target mode or None)."""
+    path = find_hidraw()
+    if not path:
+        raise Failure(1, "not-found", "EMEET PIXY not found")
+    try:
+        fd = os.open(path, os.O_RDWR | os.O_NONBLOCK)
+    except PermissionError:
+        raise Failure(3, "permission",
+                      f"no permission to open {path}; see `pixy-track --help` "
+                      "for the udev rule")
+    except OSError as e:
+        raise Failure(1, "not-found", f"can't open {path}: {e.strerror}")
+    try:
+        return command(fd, cmd)
+    except OSError as e:  # e.g. unplugged mid-command
+        raise Failure(2, "no-answer", f"camera I/O failed: {e.strerror}")
+    finally:
+        os.close(fd)
+
+
+def command(fd, cmd):
+    raw = read_mode(fd)  # also absorbs the dropped first write
+    if raw is None:
+        raise Failure(2, "no-answer", "camera did not answer")
+    if cmd == "status":
+        return raw, None
+
+    current = MODE_NAMES.get(raw)
+    if current is None and raw == AMBIGUOUS:
+        current = load_state()  # best guess: what we last knew
+    if cmd == "on":
+        target = "tracking"
+    elif cmd == "off":
+        target = "standard"
+    else:
+        target = "standard" if current == "tracking" else "tracking"
+
+    if target == "tracking" and raw == MODE_VALUES["privacy"]:
+        write_mode(fd, "standard")  # privacy -> tracking needs a stop
+        time.sleep(0.15)
+
+    raw = write_mode(fd, target)
+    if raw != MODE_VALUES[target] and raw != AMBIGUOUS:
+        time.sleep(0.2)  # first set after idle can be dropped; retry once
+        raw = write_mode(fd, target)
+    return raw, target
+
+
+def describe(state, target):
+    on_off = {"tracking": "tracking on", "standard": "tracking off",
+              "privacy": "privacy (lens closed)"}
+    if state["confirmed"]:
+        return on_off[state["mode"]]
+    if state["idle"]:
+        if target:
+            return (f"sent {on_off[target]}; the camera can't confirm it "
+                    "until an app uses it")
+        if state["mode"]:
+            return (f"camera idle; last known: {on_off[state['mode']]} "
+                    "(can't confirm until an app uses it)")
+        return ("camera idle; can't tell whether tracking is on until an "
+                "app uses it")
+    return "unknown mode"
+
+
+def main(argv):
+    args = argv[1:]
+    as_json = "--json" in args
+    args = [a for a in args if a != "--json"]
+    cmd = args[0] if args else "toggle"
+    if len(args) > 1 or cmd not in ("toggle", "on", "off", "status"):
+        print(__doc__.strip(), file=sys.stdout if cmd in ("-h", "--help")
+              else sys.stderr)
+        return 0 if cmd in ("-h", "--help") else 64
+
+    try:
+        raw, target = run(cmd)
+    except Failure as f:
+        if as_json:
+            print(json.dumps({"error": f.kind, "message": f.message}))
+        else:
+            print(f"pixy-track: {f.message}", file=sys.stderr)
+        return f.code
+
+    if raw in MODE_NAMES:
+        save_state(MODE_NAMES[raw])
+    elif raw == AMBIGUOUS and target:
+        save_state(target)
+    state = {
+        "mode": MODE_NAMES.get(raw) or (load_state() if raw == AMBIGUOUS else None),
+        "confirmed": raw in MODE_NAMES,
+        "idle": raw == AMBIGUOUS,
+    }
+    switched = target is None or raw in (MODE_VALUES[target], AMBIGUOUS)
+    if not switched:
+        state["error"] = "not-switched"
+        state["message"] = f"camera did not switch to {target}"
+
+    if as_json:
+        print(json.dumps(state))
+    elif switched:
+        print(describe(state, target))
+    else:
+        print(f"pixy-track: {state['message']} "
+              f"(now: {describe(state, None)})", file=sys.stderr)
+    return 0 if switched else 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

@@ -18,6 +18,7 @@ PanelFrame {
         BrightnessData.refresh()
         WifiData.refresh()
         BluetoothData.updateStatus()
+        PixyData.refresh()
     }
 
     function openDetail(name) {
@@ -115,6 +116,23 @@ PanelFrame {
             subtitle: RecorderData.recording ? "REC " + RecorderData.elapsedText : "opens recorder"
             lit: RecorderData.recording
             onClicked: AppState.openPanel("recorder", panel.screen.name)
+        }
+
+        Tile {
+            visible: PixyData.available
+            iconName: PixyData.mode === "privacy" ? "webcam-slash" : "webcam"
+            title: "Tracking"
+            subtitle: PixyData.busy ? "…"
+                : PixyData.error === "permission" ? "no access"
+                : PixyData.error === "no-answer" ? "not responding"
+                : PixyData.error === "not-switched" ? "didn't switch"
+                : PixyData.error !== "" ? "failed"
+                : PixyData.mode === "privacy" ? "lens closed"
+                : !PixyData.confirmed ? "camera idle"
+                : PixyData.tracking ? "following you" : "off"
+            subtitleColor: PixyData.error !== "" ? Theme.warn : Theme.textDim
+            lit: PixyData.tracking
+            onClicked: PixyData.toggle()
         }
 
         Tile {

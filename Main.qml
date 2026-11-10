@@ -19,7 +19,7 @@ Rectangle {
     // Singletons start on first use. These collect history and counts a panel
     // should already have the first time it opens, and HyprlandData has to know
     // the config format before the first click sends Hyprland a command.
-    readonly property var preloaded: [SystemStatsData, LogitechData, BatteryData, GitHubData, UpdateData, HyprlandData]
+    readonly property var preloaded: [SystemStatsData, LogitechData, BatteryData, GitHubData, UpdateData, HyprlandData, PixyData]
 
     // Every build of this font moves nearly all its codepoints, and js/AppGlyphs.js lists them
     // for this one, so each machine uses this copy. It wins over an installed one of the same name.

@@ -25,3 +25,4 @@ singleton ClipboardData 1.0 ClipboardData.qml
 singleton UpdateData 1.0 UpdateData.qml
 singleton HyprlandData 1.0 HyprlandData.qml
 singleton SteamData 1.0 SteamData.qml
+singleton PixyData 1.0 PixyData.qml
