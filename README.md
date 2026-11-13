@@ -17,13 +17,20 @@ output, with everything else morphing out of it.
 ## Accent
 
 `scripts/apply-accent.sh` takes the accent from the wallpaper and passes it on to
-Hyprland's borders, Ghostty's cursor, Neovim, Yazi, tmux, herdr and the Starship
-directory. Backgrounds and syntax colors stay Catppuccin Mocha. It runs from
-`set-wallpaper.sh`, and "Derive accent from wallpaper" in the wallpaper picker turns it
-off. Generated files go in `~/.cache/quickshell`. Yazi uses palette color 89, which the
+Hyprland's borders, Ghostty's cursor, Neovim, Yazi, tmux, herdr, lazygit, lazydocker
+and the Starship directory. Backgrounds and syntax colors stay Catppuccin Mocha. It runs
+from `set-wallpaper.sh`, and "Derive accent from wallpaper" in the wallpaper picker turns
+it off. Generated files go in `~/.cache/quickshell`. Yazi uses palette color 89, which the
 script redefines in Ghostty, so open Yazi windows recolor without a restart. herdr can't
 include another file, so the script sets `accent` under `[theme.custom]` in herdr's own
 `config.toml` and reloads the running server.
+
+lazygit reads `~/.cache/quickshell/accent-lazygit.yml` on top of its own config when the
+shell exports `LG_CONFIG_FILE` with both files, as the dotfiles' zsh `.init` does.
+lazydocker can't layer config files, so the script writes the theme to
+`~/.config/lazydocker/config.yml`, but only while that file is empty or was written by
+the script, and lazydocker reads it at launch. Both keep the selected line Mocha
+gray, since the light accent would hide the text on it.
 
 GTK apps need the `catppuccin-mocha-pink-standard+default` theme installed. The script
 makes two accent copies of it in `~/.local/share/themes` and switches between them,
