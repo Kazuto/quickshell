@@ -232,6 +232,37 @@ write_vivaldi_css() {
 EOF
 }
 
+# herdr can't include another file, so the accent goes straight into its config, which
+# neither dotfiles repo tracks. Writing through the file keeps it a symlink, and an
+# unchanged accent leaves the file and the running server alone.
+apply_herdr() {
+    config="${HERDR_CONFIG_PATH:-$HOME/.config/herdr/config.toml}"
+    [ -f "$config" ] || return 0
+
+    # Quickshell's PATH doesn't include ~/.local/bin, where herdr installs itself
+    herdr=$(command -v herdr || printf '%s' "$HOME/.local/bin/herdr")
+
+    updated=$(awk -v line="accent = \"$1\"" '
+        NR == FNR { if ($0 == "[theme.custom]") has = 1; next }
+        /^\[/ {
+            if (section == "[theme.custom]" && !done) { print line; done = 1 }
+            if (section == "[theme]" && !has && !done) { print "[theme.custom]"; print line; print ""; done = 1 }
+            section = $0
+        }
+        section == "[theme.custom]" && !done && /^#? *accent *=/ { print line; done = 1; next }
+        { print }
+        END {
+            if (!done) {
+                if (section != "[theme.custom]") print "\n[theme.custom]"
+                print line
+            }
+        }' "$config" "$config") || return 0
+
+    [ "$updated" = "$(cat "$config")" ] && return 0
+    printf '%s\n' "$updated" > "$config"
+    [ -x "$herdr" ] && "$herdr" server reload-config >/dev/null 2>&1
+}
+
 apply_hyprland() {
     hex=${1#\#}
     # Only a Lua config answers ok to eval. A hyprland.conf needs keyword instead.
@@ -244,6 +275,7 @@ apply() {
     write_configs "$1"
     apply_hyprland "$1"
     apply_gtk "$1"
+    apply_herdr "$1"
     tmux source-file -q "$CACHE/accent-tmux.conf" >/dev/null 2>&1
     pkill -USR2 -x ghostty 2>/dev/null
     printf '%s\n' "$1" > "$ACCENT_FILE"
@@ -259,6 +291,7 @@ case "${1:-}" in
         accent=$(stored_accent)
         write_configs "$accent"
         apply_hyprland "$accent"
+        apply_herdr "$accent"
         case "$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null)" in
             "'accent-a'" | "'accent-b'") ;;
             *) apply_gtk "$accent" ;;

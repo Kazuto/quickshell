@@ -17,11 +17,13 @@ output, with everything else morphing out of it.
 ## Accent
 
 `scripts/apply-accent.sh` takes the accent from the wallpaper and passes it on to
-Hyprland's borders, Ghostty's cursor, Neovim, Yazi, tmux and the Starship directory.
-Backgrounds and syntax colors stay Catppuccin Mocha. It runs from `set-wallpaper.sh`,
-and "Derive accent from wallpaper" in the wallpaper picker turns it off. Generated
-files go in `~/.cache/quickshell`. Yazi uses palette color 89, which the script
-redefines in Ghostty, so open Yazi windows recolor without a restart.
+Hyprland's borders, Ghostty's cursor, Neovim, Yazi, tmux, herdr and the Starship
+directory. Backgrounds and syntax colors stay Catppuccin Mocha. It runs from
+`set-wallpaper.sh`, and "Derive accent from wallpaper" in the wallpaper picker turns it
+off. Generated files go in `~/.cache/quickshell`. Yazi uses palette color 89, which the
+script redefines in Ghostty, so open Yazi windows recolor without a restart. herdr can't
+include another file, so the script sets `accent` under `[theme.custom]` in herdr's own
+`config.toml` and reloads the running server.
 
 GTK apps need the `catppuccin-mocha-pink-standard+default` theme installed. The script
 makes two accent copies of it in `~/.local/share/themes` and switches between them,
